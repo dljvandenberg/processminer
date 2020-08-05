@@ -29,10 +29,24 @@ events <- eventdataR::patients      # Simple eventlog containing 1050 cases
 ```
 
 
-
-# Create process view
+# Process flow
 
 ```{r}
-processanimateR::animate_process(events)
+# Throughput times
+processmapR::process_map(events, type = performance(units = "hours"))
+```
+
+
+
+# Dynamic process flow
+
+```{r}
+processanimateR::animate_process(events, type = performance(units = "hours"))
+```
+
+# Timeline overview
+
+```{r}
+processmapR::plotly_dotted_chart(events)
 ```
 
