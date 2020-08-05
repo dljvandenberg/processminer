@@ -1,0 +1,38 @@
+---
+title: "Process Mining Exploration"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Libraries
+library(eventdataR)
+library(edeaR)
+library(processmapR)
+library(processanimateR)
+```
+
+
+
+# Load example eventlog data
+
+```{r}
+events <- eventdataR::patients      # Simple eventlog containing 1050 cases
+#events <- eventdataR::hospital
+#events <- eventdataR::sepsis
+```
+
+
+```{r}
+#summary(events)
+```
+
+
+
+# Create process view
+
+```{r}
+processanimateR::animate_process(events)
+```
+
