@@ -11,6 +11,7 @@ RUN R -e "install.packages('DT', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('plotly', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('eventdataR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('edeaR', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('processmapR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('processanimateR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('shinycssloaders', repos='http://cran.rstudio.com/')"
 
