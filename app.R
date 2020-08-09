@@ -4,7 +4,7 @@ library(eventdataR)
 library(edeaR)
 library(dplyr)
 
-source("app/functions.R")
+source("R/functions.R")
 
 
 # Default data
