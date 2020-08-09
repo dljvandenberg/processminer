@@ -19,7 +19,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         
         sidebarPanel(
           width = 2,
-          fileInput("eventlogFile", "Upload eventlog (.csv)", accept = c(".csv")),
+          fileInput("eventlogFile", "Upload eventlog (Excel)", accept = c(".xls", ".xlsx")),
           selectInput("mapType", "Map type", c("cases", "durations"), "cases"),
           selectInput("timelineMode", "Timeline mode", c("relative", "absolute"), "relative"),
           selectInput("sizeAttribute", "Size attribute", c("none", colnames(eventlog)), "none"),
@@ -35,7 +35,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         mainPanel(
           width = 10,
           tabsetPanel(
-            tabPanel("Data", tableOutput("datatable")),
+            tabPanel("Data", dataTableOutput("datatable")),
             tabPanel("Process flow", shinycssloaders::withSpinner(processanimaterOutput("process")))
             )
 
@@ -56,6 +56,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       # having a comma separator causes `read.csv` to error
       tryCatch(
         {
+          # TODO: Remove data-specific configuration
           exceldata <- readxl::read_excel(input$eventlogFile$datapath, skip = 1) %>% 
             dplyr::rename_all(funs(make.names(.))) %>%
             select('Zaaknummer', 'Zaaktype', 'Product', 'Datum.afhandeling', 'Onderdeel') %>% 
@@ -74,6 +75,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     
     eventlog <- reactive({
       
+      # TODO: Remove data-specific configuration
       data() %>% 
         simple_eventlog(
           case_id = "Zaaknummer",
@@ -101,9 +103,9 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
 
     })
     
-    output$datatable <- renderTable({
+    output$datatable <- renderDataTable({
       
-      return(head(data()))
+      return(data())
       
     })
     
