@@ -1,5 +1,6 @@
 ## Define Shiny app
 
+library(processmapR)
 library(processanimateR)
 library(shiny)
 library(shinycssloaders)
@@ -17,11 +18,11 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         
         sidebarPanel(
           width = 2,
-          sliderInput("duration", "Animation duration", min.time, max.time, default.time),
-          selectInput("type", "Animation type", c("relative", "absolute"), "relative"),
+          selectInput("type", "Timeline type", c("relative", "absolute"), "relative"),
           selectInput("sizeAttribute", "Size attribute", c("none", colnames(eventlog)), "none"),
           selectInput("colorAttribute", "Color attribute", c("none", colnames(eventlog)), "none"),
           selectInput("orientation", "Orientation", c("horizontal"="LR", "vertical"="TB"), "horizontal"),
+          sliderInput("duration", "Animation duration", min.time, max.time, default.time),
           h4("Selected cases"),
           textOutput("token_selection"),
           h4("Selected activities"),
@@ -74,7 +75,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     })
     
     output$process <- renderProcessanimater(expr = {
-      graph <- processmapR::process_map(data(), render = F)
+      graph <- processmapR::process_map(data(), render = FALSE)
       model <- DiagrammeR::add_global_graph_attrs(graph, attr = "rankdir", value = input$orientation, attr_type = "graph")
       if (input$sizeAttribute != "none" && input$colorAttribute != "none") {
         animate_process(data(), model,
@@ -83,24 +84,27 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
                                                                 range = RColorBrewer::brewer.pal(5, "YlOrBr")),
                                             size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        duration = input$duration)
+                        duration = input$duration,
+                        token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$sizeAttribute != "none") {
         animate_process(data(), model,
                         mode = input$type,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        duration = input$duration)
-        
+                        duration = input$duration,
+                        token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$colorAttribute != "none") {
         animate_process(data(), model,
                         mode = input$type,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
-                        duration = input$duration)
+                        duration = input$duration,
+                        token_callback_select = token_select_decoration(stroke = "red"))
       } else {
         animate_process(data(), model,
                         mode = input$type,
-                        duration = input$duration)
+                        duration = input$duration,
+                        token_callback_select = token_select_decoration(stroke = "red"))
       }
       
     })
