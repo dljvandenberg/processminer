@@ -1,6 +1,6 @@
-# Usage
+# Docker commands below will make application accessible at: http://localhost
 # docker build -t processminer .
-# docker run --rm -p 3838:3838 processminer
+# docker run --rm -p 80:3838 processminer
 
 FROM rocker/shiny-verse:4.0.2
 
