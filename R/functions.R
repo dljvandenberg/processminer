@@ -1,5 +1,6 @@
 ## Define Shiny app
 
+library(bupaR)
 library(processmapR)
 library(processanimateR)
 library(shiny)
@@ -18,6 +19,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         
         sidebarPanel(
           width = 2,
+          fileInput("eventlogFile", "Upload eventlog (.csv)", accept = c(".csv")),
           selectInput("mapType", "Map type", c("cases", "durations"), "cases"),
           selectInput("timelineMode", "Timeline mode", c("relative", "absolute"), "relative"),
           selectInput("sizeAttribute", "Size attribute", c("none", colnames(eventlog)), "none"),
@@ -32,7 +34,11 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         
         mainPanel(
           width = 10,
-          shinycssloaders::withSpinner(processanimaterOutput("process"))
+          tabsetPanel(
+            tabPanel("Data", tableOutput("datatable")),
+            tabPanel("Process flow", shinycssloaders::withSpinner(processanimaterOutput("process")))
+            )
+
         )
       )
     )
@@ -40,26 +46,64 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
   
   server <- function(session, input, output) {
     
+    options(shiny.maxRequestSize=30*1024^2)
+    
     data <- reactive({
       
-      if (input$colorAttribute != "none") {
-        attr <- rlang::sym(input$colorAttribute)
-        val <- eventlog %>% pull(!!attr)
-        if (!(is.character(val) || is.factor(val))) {
-          warning("Trying to use a numeric attribute for the token color!")
-        }
-      }
+      req(input$eventlogFile)
       
-      if (input$sizeAttribute != "none") {
-        # This only works for numeric attributes
-        attr <- rlang::sym(input$sizeAttribute)
-        val <- eventlog %>% pull(!!attr)
-        if (!is.numeric(val)) {
-          warning("Trying to use a non-numeric attribute for the token size!")
+      # when reading semicolon separated files,
+      # having a comma separator causes `read.csv` to error
+      tryCatch(
+        {
+          exceldata <- readxl::read_excel(input$eventlogFile$datapath, skip = 1) %>% 
+            dplyr::rename_all(funs(make.names(.))) %>%
+            select('Zaaknummer', 'Zaaktype', 'Product', 'Datum.afhandeling', 'Onderdeel') %>% 
+            filter(Product == "Vergunning WaterWet") %>% 
+            arrange(Zaaknummer, Datum.afhandeling, Onderdeel)
+        },
+        error = function(e) {
+          # return a safeError if a parsing error occurs
+          stop(safeError(e))
         }
-      }
+      )
       
-      eventlog
+      return(exceldata)
+      
+    })
+    
+    eventlog <- reactive({
+      
+      data() %>% 
+        simple_eventlog(
+          case_id = "Zaaknummer",
+          activity_id = "Onderdeel",
+          timestamp = "Datum.afhandeling"
+          )
+      
+      # TODO: put this code in proper place
+      # if (input$colorAttribute != "none") {
+      #   attr <- rlang::sym(input$colorAttribute)
+      #   val <- eventlog %>% pull(!!attr)
+      #   if (!(is.character(val) || is.factor(val))) {
+      #     warning("Trying to use a numeric attribute for the token color!")
+      #   }
+      # }
+      # 
+      # if (input$sizeAttribute != "none") {
+      #   # This only works for numeric attributes
+      #   attr <- rlang::sym(input$sizeAttribute)
+      #   val <- eventlog %>% pull(!!attr)
+      #   if (!is.numeric(val)) {
+      #     warning("Trying to use a non-numeric attribute for the token size!")
+      #   }
+      # }
+
+    })
+    
+    output$datatable <- renderTable({
+      
+      return(head(data()))
       
     })
     
@@ -77,13 +121,13 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     
     output$process <- renderProcessanimater(expr = {
       if(input$mapType == "durations"){
-        graph <- processmapR::process_map(data(), render = FALSE, type = performance())
+        graph <- processmapR::process_map(eventlog(), render = FALSE, type = performance())
       } else {
-        graph <- processmapR::process_map(data(), render = FALSE)
+        graph <- processmapR::process_map(eventlog(), render = FALSE)
       }
       model <- DiagrammeR::add_global_graph_attrs(graph, attr = "rankdir", value = input$orientation, attr_type = "graph")
       if (input$sizeAttribute != "none" && input$colorAttribute != "none") {
-        animate_process(data(), model,
+        animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
@@ -92,21 +136,21 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                         duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$sizeAttribute != "none") {
-        animate_process(data(), model,
+        animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$colorAttribute != "none") {
-        animate_process(data(), model,
+        animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
                         duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else {
-        animate_process(data(), model,
+        animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
