@@ -6,6 +6,7 @@ library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
+library(plotly)
 
 process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time = 60) {
   
@@ -98,7 +99,12 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       ),
       tabItem(tabName = "timeline_view",
               fluidRow(
-                box("TODO")
+                box(title = "Timeline view",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    shinycssloaders::withSpinner(plotlyOutput("plotlydottedchart"))
+                ),
               )
       ),
       tabItem(tabName = "about_processminer",
@@ -240,6 +246,10 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                         token_callback_select = token_select_decoration(stroke = "red"))
       }
       
+    })
+    
+    output$plotlydottedchart <- renderPlotly(expr = {
+      processmapR::plotly_dotted_chart(eventlog())
     })
     
   }
