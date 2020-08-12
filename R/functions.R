@@ -4,45 +4,88 @@ library(bupaR)
 library(processmapR)
 library(processanimateR)
 library(shiny)
+library(shinydashboard)
 library(shinycssloaders)
 
 process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time = 60) {
   
-  ui <- function(request) {
-    fluidPage(
-      tags$head(tags$style("#process{height:90vh !important;}")),
-      titlePanel(title = "ProcessMiner 0.1", 
-                 windowTitle = "ProcessMiner 0.1"),
-      h5(tags$em("A project by Dennis van den Berg")),
-      
-      sidebarLayout(
-        
-        sidebarPanel(
-          width = 2,
-          fileInput("eventlogFile", "Upload eventlog (Excel)", accept = c(".xls", ".xlsx")),
-          selectInput("mapType", "Map type", c("cases", "durations"), "cases"),
-          selectInput("timelineMode", "Timeline mode", c("relative", "absolute"), "relative"),
-          selectInput("sizeAttribute", "Size attribute", c("none", colnames(eventlog)), "none"),
-          selectInput("colorAttribute", "Color attribute", c("none", colnames(eventlog)), "none"),
-          selectInput("orientation", "Orientation", c("horizontal"="LR", "vertical"="TB"), "horizontal"),
-          sliderInput("duration", "Animation duration", min.time, max.time, default.time),
-          h4("Selected cases"),
-          textOutput("token_selection"),
-          h4("Selected activities"),
-          textOutput("activity_selection")
-        ),
-        
-        mainPanel(
-          width = 10,
-          tabsetPanel(
-            tabPanel("Data", dataTableOutput("datatable")),
-            tabPanel("Process flow", shinycssloaders::withSpinner(processanimaterOutput("process")))
-            )
-
-        )
+  header <- dashboardHeader(title = "ProcessMiner")
+  
+  sidebar <- dashboardSidebar(
+    sidebarMenu(
+      menuItem(text = "Load data", tabName = "load_data", icon = icon("upload")),
+      menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
+      menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
+      menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
+      menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
+      menuItem(text = "About ProcessMiner", tabName = "about_processminer", icon = icon("info-circle"))
+    )
+  )
+  
+  # TODO: convert mainPanel to dashboardBody format
+  body <- dashboardBody(
+    tabItems(
+      tabItem(tabName = "load_data",
+              fluidRow(
+                box(fileInput("eventlogFile", "Upload eventlog (Excel)", accept = c(".xls", ".xlsx")))
+              )
+      ),
+      tabItem(tabName = "table_view",
+              fluidRow(
+                box(dataTableOutput("datatable"))
+              )
+      ),
+      tabItem(tabName = "summary_statistics",
+              fluidRow(
+                box()
+              )
+      ),
+      tabItem(tabName = "process_flow",
+              fluidRow(
+                box(width = 4,
+                  # TODO: improve layout
+                  selectInput("mapType", "Map type", c("cases", "durations"), "cases"),
+                  selectInput("timelineMode", "Timeline mode", c("relative", "absolute"), "relative"),
+                  selectInput("sizeAttribute", "Size attribute", c("none", colnames(eventlog)), "none"),
+                  selectInput("colorAttribute", "Color attribute", c("none", colnames(eventlog)), "none"),
+                  selectInput("orientation", "Orientation", c("horizontal"="LR", "vertical"="TB"), "horizontal"),
+                  sliderInput("duration", "Animation duration", min.time, max.time, default.time)
+                ),
+                box(width = 8,
+                  shinycssloaders::withSpinner(processanimaterOutput("process"))
+                )
+              ),
+              fluidRow(
+                box(width = 4,
+                    h4("Selected cases"),
+                    textOutput("token_selection"),
+                    h4("Selected activities"),
+                    textOutput("activity_selection")
+                )
+              )
+      ),
+      tabItem(tabName = "timeline_view",
+              fluidRow(
+                box()
+              )
+      ),
+      tabItem(tabName = "about_processminer",
+              fluidRow(
+                box()
+              )
       )
     )
+  )
+
+  
+  ui <- function(request) {
+    dashboardPage(
+      header,
+      sidebar,
+      body
+    )
   }
+  
   
   server <- function(session, input, output) {
     
