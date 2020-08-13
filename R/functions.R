@@ -153,38 +153,24 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       
     })
     
+    
     eventlog <- reactive({
       
-      # TODO: Remove data-specific configuration
+      req(data())
+      req(input$case_id_var %in% colnames(data()))
+      req(input$timestamp_var %in% colnames(data()))
+      req(input$activity_var %in% colnames(data()))
+      req(input$variable_selection_saved)
+      
+      # Create eventlog from raw data
       data() %>% 
         simple_eventlog(
-          case_id = "Zaaknummer",
-          activity_id = "Onderdeel",
-          timestamp = "Datum.afhandeling"
+          case_id = input$case_id_var,
+          activity_id = input$activity_var,
+          timestamp = input$timestamp_var
           )
       
-      # TODO: put this code in proper place
-      # if (input$colorAttribute != "none") {
-      #   attr <- rlang::sym(input$colorAttribute)
-      #   val <- eventlog %>% pull(!!attr)
-      #   if (!(is.character(val) || is.factor(val))) {
-      #     warning("Trying to use a numeric attribute for the token color!")
-      #   }
-      # }
-      # 
-      # if (input$sizeAttribute != "none") {
-      #   # This only works for numeric attributes
-      #   attr <- rlang::sym(input$sizeAttribute)
-      #   val <- eventlog %>% pull(!!attr)
-      #   if (!is.numeric(val)) {
-      #     warning("Trying to use a non-numeric attribute for the token size!")
-      #   }
-      # }
-
     })
-
-    
-
     
 
     output$data_sample_box <- renderUI({
@@ -219,7 +205,9 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
           # Mark relevant fields in uploaded data (case_id, timestamp, activity, additional features)
           selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "none"),
           selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "none"),
-          selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none")
+          selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none"),
+          # TODO: add action to button
+          actionButton(inputId = "variable_selection_saved", label = "Save")
       )
     })
     
