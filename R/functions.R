@@ -33,16 +33,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                     width = 12,
                     fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
                 ),
-                box(title = "Select column names",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    "TODO",
-                    # Mark relevant fields in uploaded data (case_id, timestamp, activity, additional features)
-                    selectInput(inputId = "case_id_var", label = "Select case_id column", choices = c()),
-                    selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = c()),
-                    selectInput(inputId = "activity_var", label = "Select activity column", choices = c())
-                ),
+                uiOutput(outputId = "data_sample_box"),
+                uiOutput(outputId = "variable_selection_box"),
               )
       ),
       tabItem(tabName = "table_view",
@@ -190,12 +182,56 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       # }
 
     })
+
+    
+
+    
+
+    output$data_sample_box <- renderUI({
+      
+      req(data())
+      
+      output$datatable_head <- renderDataTable({
+        data() %>% 
+          head(5)
+      })
+      
+      box(title = "Data sample",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          dataTableOutput(outputId = "datatable_head")
+      )      
+      
+    })
+    
+    
+    output$variable_selection_box <- renderUI({
+      
+      req(data())
+      
+      available_variables <- c("", colnames(data()))
+      
+      box(title = "Select column names",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          # Mark relevant fields in uploaded data (case_id, timestamp, activity, additional features)
+          selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "none"),
+          selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "none"),
+          selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none")
+      )
+    })
+    
     
     output$datatable <- renderDataTable({
+      
+      req(data())
       
       return(data())
       
     })
+    
     
     output$token_selection <- renderText({
       
@@ -203,11 +239,13 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       
     })
     
+    
     output$activity_selection <- renderText({
       
       paste0(input$process_activities, ",")
       
     })
+    
     
     output$process <- renderProcessanimater(expr = {
       if(input$mapType == "durations"){
