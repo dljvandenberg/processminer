@@ -11,120 +11,127 @@ library(plotly)
 
 process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time = 60) {
   
+  ## Header
   header <- dashboardHeader(title = "ProcessMiner")
   
+  ## Sidebar items
   sidebar <- dashboardSidebar(
     sidebarMenu(
       menuItem(text = "Load data", icon = icon("database"),
                menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload")),
-               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list-ol"))
+               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"))
                ),
       menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
       menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
       menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
       menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
-      menuItem(text = "About ProcessMiner", tabName = "about_processminer", icon = icon("info-circle"))
+      menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
     )
   )
   
+  
+  ## Components for dashboard body
+  
+  body_data_upload <- fluidRow(
+    box(title = "File upload",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
+    ),
+    uiOutput(outputId = "data_sample_box"),
+    uiOutput(outputId = "variable_selection_box")
+  )
+  
+  body_example_dataset <- fluidRow(
+    box(title = "Example dataset",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        uiOutput("example_dataset_selector")
+    )
+  )
+
+  body_table_view <- fluidRow(
+    box(title = "Raw data",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        dataTableOutput("datatable")
+    )
+  )  
+  
+  body_summary_statistics <- fluidRow(
+    box("TODO")
+  )
+  
+  body_process_flow <- fluidRow(
+    column(width = 3,
+           box(title = "Settings",
+               status = "primary",
+               solidHeader = TRUE,
+               width = 12,
+               selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
+               selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
+               selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog)), selected = "none"),
+               selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog)), selected = "none"),
+               selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
+               sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
+           )  
+    ),
+    column(width = 9,
+           box(title = "Process flow diagram",
+               status = "primary",
+               solidHeader = TRUE,
+               width = 12,
+               shinycssloaders::withSpinner(processanimaterOutput("process"))
+           ),
+           box(title = "Selected cases",
+               status = "primary",
+               solidHeader = TRUE,
+               width = 12,
+               textOutput("token_selection")
+           ),
+           box(title = "Selected activities",
+               status = "primary",
+               solidHeader = TRUE,
+               width = 12,
+               textOutput("activity_selection")
+           )
+    )
+  )
+  
+  body_timeline_view <- fluidRow(
+    box(title = "Timeline view",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        shinycssloaders::withSpinner(plotlyOutput("plotlydottedchart"))
+    ),
+  )
+  
+  body_about_this_app <- fluidRow(
+    box(title = "About ProcessMiner",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
+        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: work in progress."),
+        p("Source code: https://github.com/dljvandenberg/processminer")
+    )
+  )
+  
+
+  ## Dashboard body
   body <- dashboardBody(
     tabItems(
-      tabItem(tabName = "data_upload",
-              fluidRow(
-                box(title = "File upload",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
-                ),
-                uiOutput(outputId = "data_sample_box"),
-                uiOutput(outputId = "variable_selection_box"),
-              )
-      ),
-      tabItem(tabName = "example_dataset",
-              fluidRow(
-                box(title = "Example dataset",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    uiOutput("example_dataset_selector")
-                )
-              )
-      ),
-      tabItem(tabName = "table_view",
-              fluidRow(
-                box(title = "Raw data",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    dataTableOutput("datatable")
-                )
-              )
-      ),
-      tabItem(tabName = "summary_statistics",
-              fluidRow(
-                box("TODO")
-              )
-      ),
-      tabItem(tabName = "process_flow",
-              fluidRow(
-                column(width = 3,
-                       box(title = "Settings",
-                           status = "primary",
-                           solidHeader = TRUE,
-                           width = 12,
-                           selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
-                           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-                           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog)), selected = "none"),
-                           selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog)), selected = "none"),
-                           selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
-                           sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
-                       )  
-                ),
-                column(width = 9,
-                       box(title = "Process flow diagram",
-                           status = "primary",
-                           solidHeader = TRUE,
-                           width = 12,
-                           shinycssloaders::withSpinner(processanimaterOutput("process"))
-                       ),
-                       box(title = "Selected cases",
-                           status = "primary",
-                           solidHeader = TRUE,
-                           width = 12,
-                           textOutput("token_selection")
-                       ),
-                       box(title = "Selected activities",
-                           status = "primary",
-                           solidHeader = TRUE,
-                           width = 12,
-                           textOutput("activity_selection")
-                       )
-                )
-              )
-      ),
-      tabItem(tabName = "timeline_view",
-              fluidRow(
-                box(title = "Timeline view",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    shinycssloaders::withSpinner(plotlyOutput("plotlydottedchart"))
-                ),
-              )
-      ),
-      tabItem(tabName = "about_processminer",
-              fluidRow(
-                box(title = "About ProcessMiner",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-                    p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: work in progress."),
-                    p("Source code: https://github.com/dljvandenberg/processminer")
-                )
-              )
-      )
+      tabItem(tabName = "data_upload", body_data_upload),
+      tabItem(tabName = "example_dataset", body_example_dataset),
+      tabItem(tabName = "table_view", body_table_view),
+      tabItem(tabName = "summary_statistics", body_summary_statistics),
+      tabItem(tabName = "process_flow", body_process_flow),
+      tabItem(tabName = "timeline_view", body_timeline_view),
+      tabItem(tabName = "about_this_app", body_about_this_app)
     )
   )
 
