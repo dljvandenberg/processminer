@@ -59,7 +59,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
         status = "primary",
         solidHeader = TRUE,
         width = 12,
-        dataTableOutput("datatable")
+        shinycssloaders::withSpinner(dataTableOutput("datatable"))
     )
   )  
   
@@ -251,9 +251,13 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     
     output$datatable <- renderDataTable({
       
-      req(data())
+      req(eventlog())
       
-      return(data())
+      # Don't show eventlog columns that are irrelevant to user
+      irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
+      eventlog() %>%
+        as.data.frame() %>% 
+        select(-any_of(irrelevant_cols))
       
     })
     
