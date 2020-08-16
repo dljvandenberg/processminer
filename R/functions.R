@@ -1,6 +1,7 @@
 ## Define Shiny app
 
 library(bupaR)
+library(eventdataR)
 library(processmapR)
 library(processanimateR)
 library(shiny)
@@ -14,7 +15,10 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
   
   sidebar <- dashboardSidebar(
     sidebarMenu(
-      menuItem(text = "Load data", tabName = "load_data", icon = icon("upload")),
+      menuItem(text = "Load data", icon = icon("database"),
+               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload")),
+               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list-ol"))
+               ),
       menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
       menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
       menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
@@ -25,7 +29,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
   
   body <- dashboardBody(
     tabItems(
-      tabItem(tabName = "load_data",
+      tabItem(tabName = "data_upload",
               fluidRow(
                 box(title = "File upload",
                     status = "primary",
@@ -35,6 +39,16 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                 ),
                 uiOutput(outputId = "data_sample_box"),
                 uiOutput(outputId = "variable_selection_box"),
+              )
+      ),
+      tabItem(tabName = "example_dataset",
+              fluidRow(
+                box(title = "Example dataset",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    uiOutput("example_dataset_selector")
+                )
               )
       ),
       tabItem(tabName = "table_view",
@@ -210,6 +224,18 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
           actionButton(inputId = "variable_selection_saved", label = "Save")
       )
     })
+    
+    
+    
+    output$example_dataset_selector <- renderUI({
+      
+      # Datasets available via eventdataR package (TODO: put either in configuration or generate from available functions in eventdataR package)
+      available_datasets <- c("hospital", "hospital_billing", "patients", "sepsis", "traffic_fines")
+      
+      selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", 
+                  choices = c("", available_datasets), selected = "")
+    })
+    
     
     
     output$datatable <- renderDataTable({
