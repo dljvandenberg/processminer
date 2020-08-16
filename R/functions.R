@@ -188,12 +188,12 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       req(input$variable_selection_saved)
       
       # Create eventlog from raw data
-      data() %>% 
+      data() %>%
         simple_eventlog(
           case_id = input$case_id_var,
           activity_id = input$activity_var,
           timestamp = input$timestamp_var
-          )
+        )
       
     })
     
@@ -204,7 +204,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       
       output$datatable_head <- renderDataTable({
         data() %>% 
-          head(5)
+          head(3)
       })
       
       box(title = "Data sample",
