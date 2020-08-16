@@ -11,6 +11,8 @@ library(plotly)
 
 process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time = 60) {
   
+  ### UI code ###
+  
   ## Header
   header <- dashboardHeader(title = "ProcessMiner")
   
@@ -144,6 +146,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     )
   }
   
+  
+  ### Server code ###
   
   server <- function(session, input, output) {
     
@@ -312,6 +316,9 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     })
     
   }
+  
+  
+  ### Start app ###
   
   shinyApp(ui, server, options = list(height = 500))
   
