@@ -69,17 +69,7 @@ process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
   
   body_process_flow <- fluidRow(
     column(width = 3,
-           box(title = "Settings",
-               status = "primary",
-               solidHeader = TRUE,
-               width = 12,
-               selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
-               selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-               #selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-               #selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-               selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
-               sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
-           )  
+           uiOutput("process_flow_settings_box")
     ),
     column(width = 9,
            box(title = "Process flow diagram",
@@ -283,6 +273,24 @@ process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
       eventlog() %>%
         as.data.frame() %>% 
         select(-any_of(irrelevant_cols))
+      
+    })
+    
+    
+    output$process_flow_settings_box <- renderUI({
+    
+      box(title = "Settings",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          
+          selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
+          selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
+          selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
+          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
+          selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
+          sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
+      )
       
     })
     
