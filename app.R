@@ -17,4 +17,4 @@ eventlog_default <- sepsis %>%
   mutate_at(c("disfuncorg", "sirscriteria2ormore", "infectionsuspected"), as.logical)
 
 # View
-process_viewer(eventlog = eventlog_default)
+process_viewer()

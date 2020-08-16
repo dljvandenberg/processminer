@@ -9,7 +9,7 @@ library(shinydashboard)
 library(shinycssloaders)
 library(plotly)
 
-process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time = 60) {
+process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
   
   ### UI code ###
   
@@ -19,8 +19,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
   ## Sidebar items
   sidebar <- dashboardSidebar(
     sidebarMenu(
-      menuItem(text = "Load data", icon = icon("database"),
-               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload")),
+      menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
+               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"), selected = TRUE),
                menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"))
                ),
       menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
@@ -75,8 +75,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
                width = 12,
                selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
                selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-               selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog)), selected = "none"),
-               selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog)), selected = "none"),
+               #selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
+               #selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
                selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
                sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
            )  
@@ -153,6 +153,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     
     options(shiny.maxRequestSize=30*1024^2)
     
+    eventlog <- reactiveVal(eventlog_default)
+    
     data <- reactive({
       
       req(input$eventlogFile)
@@ -179,25 +181,6 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
     })
     
     
-    eventlog <- reactive({
-      
-      req(data())
-      req(input$case_id_var %in% colnames(data()))
-      req(input$timestamp_var %in% colnames(data()))
-      req(input$activity_var %in% colnames(data()))
-      req(input$variable_selection_saved)
-      
-      # Create eventlog from raw data
-      data() %>%
-        simple_eventlog(
-          case_id = input$case_id_var,
-          activity_id = input$activity_var,
-          timestamp = input$timestamp_var
-        )
-      
-    })
-    
-
     output$data_sample_box <- renderUI({
       
       req(data())
@@ -232,7 +215,7 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
           selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "none"),
           selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none"),
           # TODO: add action to button
-          actionButton(inputId = "variable_selection_saved", label = "Save")
+          actionButton(inputId = "generate_eventlog_from_upload_button", label = "Generate eventlog")
       )
     })
     
@@ -243,10 +226,50 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       # Datasets available via eventdataR package (TODO: put either in configuration or generate from available functions in eventdataR package)
       available_datasets <- c("hospital", "hospital_billing", "patients", "sepsis", "traffic_fines")
       
-      selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", 
-                  choices = c("", available_datasets), selected = "")
+      column(width = 12,
+        selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = ""),
+        actionButton(inputId = "load_example_eventlog_button", label = "Load eventlog")
+      )
     })
     
+    
+    # On button click 
+    observeEvent(input$generate_eventlog_from_upload_button,{
+      
+      req(data())
+      req(input$case_id_var %in% colnames(data()))
+      req(input$timestamp_var %in% colnames(data()))
+      req(input$activity_var %in% colnames(data()))
+
+      # Set eventlog reactive value from data
+      data() %>%
+        simple_eventlog(
+          case_id = input$case_id_var,
+          activity_id = input$activity_var,
+          timestamp = input$timestamp_var
+        ) %>% 
+        eventlog()
+      print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded!"))
+      print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
+      print(paste0("DEBUG: class(eventlog()): ", paste0(class(eventlog()), collapse = ", ")))
+      
+    })
+    
+    
+    # On button click 
+    observeEvent(input$load_example_eventlog_button,{
+      
+      req(input$selected_example_dataset)
+      
+      if(input$selected_example_dataset != ""){
+        # Set eventlog reactive value
+        eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
+        print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded!"))
+        print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
+        print(paste0("DEBUG: class(eventlog()): ", paste0(class(eventlog()), collapse = ", ")))
+      }
+      
+    })
     
     
     output$datatable <- renderDataTable({
@@ -254,6 +277,8 @@ process_viewer <- function(eventlog, min.time = 30, max.time = 600, default.time
       req(eventlog())
       
       # Don't show eventlog columns that are irrelevant to user
+      print("DEBUG: datatable from eventlog")
+      print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
       irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
       eventlog() %>%
         as.data.frame() %>% 
