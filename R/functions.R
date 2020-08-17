@@ -287,8 +287,7 @@ process_viewer <- function() {
           selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal")
+          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none")
       )
       
     })
@@ -314,9 +313,8 @@ process_viewer <- function() {
       } else {
         graph <- processmapR::process_map(eventlog(), render = FALSE)
       }
-      model <- DiagrammeR::add_global_graph_attrs(graph, attr = "rankdir", value = input$orientation, attr_type = "graph")
       if (input$sizeAttribute != "none" && input$colorAttribute != "none") {
-        animate_process(eventlog(), model,
+        animate_process(eventlog(), graph,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
@@ -324,19 +322,19 @@ process_viewer <- function() {
                                             size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$sizeAttribute != "none") {
-        animate_process(eventlog(), model,
+        animate_process(eventlog(), graph,
                         mode = input$timelineMode,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$colorAttribute != "none") {
-        animate_process(eventlog(), model,
+        animate_process(eventlog(), graph,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else {
-        animate_process(eventlog(), model,
+        animate_process(eventlog(), graph,
                         mode = input$timelineMode,
                         token_callback_select = token_select_decoration(stroke = "red"))
       }
