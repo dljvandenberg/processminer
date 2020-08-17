@@ -287,7 +287,8 @@ process_viewer <- function() {
           selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none")
+          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
+          sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
       )
       
     })
@@ -308,13 +309,21 @@ process_viewer <- function() {
     
     
     output$process <- renderProcessanimater(expr = {
+      
+      # Filter base eventlog
+      plotdata <- eventlog() %>% 
+        edeaR::filter_trace_frequency(percentage = input$traceFrequency / 100)
+      
+      # Base process map
       if(input$mapType == "durations"){
-        graph <- processmapR::process_map(eventlog(), render = FALSE, type = performance())
+        graph <- processmapR::process_map(plotdata, render = FALSE, type = performance(units = "days"))
       } else {
-        graph <- processmapR::process_map(eventlog(), render = FALSE)
+        graph <- processmapR::process_map(plotdata, render = FALSE)
       }
+      
+      # Animated process map
       if (input$sizeAttribute != "none" && input$colorAttribute != "none") {
-        animate_process(eventlog(), graph,
+        animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
@@ -322,19 +331,19 @@ process_viewer <- function() {
                                             size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$sizeAttribute != "none") {
-        animate_process(eventlog(), graph,
+        animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$colorAttribute != "none") {
-        animate_process(eventlog(), graph,
+        animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else {
-        animate_process(eventlog(), graph,
+        animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         token_callback_select = token_select_decoration(stroke = "red"))
       }
