@@ -143,7 +143,7 @@ process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
     
     options(shiny.maxRequestSize=30*1024^2)
     
-    eventlog <- reactiveVal(eventlog_default)
+    eventlog <- reactiveVal()
     
     data <- reactive({
       
