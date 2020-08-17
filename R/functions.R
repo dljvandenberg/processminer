@@ -9,7 +9,7 @@ library(shinydashboard)
 library(shinycssloaders)
 library(plotly)
 
-process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
+process_viewer <- function() {
   
   ### UI code ###
   
@@ -288,8 +288,7 @@ process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
           selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal"),
-          sliderInput(inputId = "duration", label = "Animation duration", min = min.time, max = max.time, value = default.time)
+          selectInput(inputId = "orientation", label = "Orientation", choices = c("horizontal"="LR", "vertical"="TB"), selected = "horizontal")
       )
       
     })
@@ -323,26 +322,22 @@ process_viewer <- function(min.time = 30, max.time = 600, default.time = 60) {
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
                                                                 range = RColorBrewer::brewer.pal(5, "YlOrBr")),
                                             size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$sizeAttribute != "none") {
         animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else if (input$colorAttribute != "none") {
         animate_process(eventlog(), model,
                         mode = input$timelineMode,
                         legend = "color",
                         mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
-                        duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       } else {
         animate_process(eventlog(), model,
                         mode = input$timelineMode,
-                        duration = input$duration,
                         token_callback_select = token_select_decoration(stroke = "red"))
       }
       
