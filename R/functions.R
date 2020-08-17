@@ -278,6 +278,10 @@ process_viewer <- function() {
     
     
     output$process_flow_settings_box <- renderUI({
+      
+      timestamp_var <- bupaR::timestamp(eventlog())
+      timestamp_min <- min(pull(eventlog(), timestamp_var))
+      timestamp_max <- max(pull(eventlog(), timestamp_var))
     
       box(title = "Settings",
           status = "primary",
@@ -288,6 +292,9 @@ process_viewer <- function() {
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
           selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
+          # TODO_CURRENT
+          dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
+          sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
           sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
       )
       
