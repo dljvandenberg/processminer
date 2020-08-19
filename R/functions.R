@@ -108,7 +108,7 @@ process_viewer <- function() {
         solidHeader = TRUE,
         width = 12,
         p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: work in progress."),
+        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: experimental."),
         p("Source code: https://github.com/dljvandenberg/processminer")
     )
   )
@@ -204,7 +204,6 @@ process_viewer <- function() {
           selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "none"),
           selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "none"),
           selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none"),
-          # TODO: add action to button
           actionButton(inputId = "generate_eventlog_from_upload_button", label = "Generate eventlog")
       )
     })
@@ -213,7 +212,8 @@ process_viewer <- function() {
     
     output$example_dataset_selector <- renderUI({
       
-      # Datasets available via eventdataR package (TODO: put either in configuration or generate from available functions in eventdataR package)
+      # Datasets available via eventdataR package
+      # TODO: fix hardcoded available_datasets (put either in configuration or generate from available functions in eventdataR package)
       available_datasets <- c("hospital", "hospital_billing", "patients", "sepsis", "traffic_fines")
       
       column(width = 12,
@@ -292,9 +292,9 @@ process_viewer <- function() {
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
           selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          # TODO_CURRENT
-          dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
-          sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
+          # TODO_CURRENT: add time filter option
+          #dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
+          #sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
           sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
       )
       
