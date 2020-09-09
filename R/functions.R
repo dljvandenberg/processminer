@@ -7,6 +7,7 @@ library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
+library(shinyhelper)
 library(plotly)
 
 process_viewer <- function() {
