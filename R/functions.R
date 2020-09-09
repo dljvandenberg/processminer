@@ -108,7 +108,8 @@ process_viewer <- function() {
         solidHeader = TRUE,
         width = 12,
         p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: experimental."),
+        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R."),
+        p("Its current status is: experimental."),
         p("Source code: https://github.com/dljvandenberg/processminer")
     )
   )
