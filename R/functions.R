@@ -214,7 +214,7 @@ process_viewer <- function() {
       
       # Datasets available via eventdataR package
       # TODO: fix hardcoded available_datasets (put either in configuration or generate from available functions in eventdataR package)
-      available_datasets <- c("hospital", "hospital_billing", "patients", "sepsis", "traffic_fines")
+      available_datasets <- c("hospital_billing", "patients", "sepsis", "traffic_fines")
       
       column(width = 12,
         selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = ""),
