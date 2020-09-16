@@ -169,18 +169,35 @@ process_viewer <- function() {
     
     output$sidebarmenu <- renderMenu({
       
-      # TODO_CURRENT: make menuitems dependent on whether or not eventlog() is loaded
-      sidebarMenu(
-        menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
-                 menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"), selected = TRUE),
-                 menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"))
-        ),
-        menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-        menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
-        menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
-        menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
-        menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
-      )    
+      # NULL eventlog corresponds to to data loaded. In case of no data loaded, show less menu items
+      data_loaded <- !is.null(eventlog())
+      
+      # Define these menuitems once, in order to use them in the conditional part below
+      menuitem_dataload <- menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
+               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"), selected = TRUE),
+               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"))
+      )
+      menuitem_about <- menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
+      
+      if(data_loaded){
+        # Show extended menu when data has been loaded
+        sidebarMenu(
+          menuitem_dataload,
+          menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
+          menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
+          menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
+          menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
+          menuitem_about
+        )    
+        
+      } else {
+        # Show short menu when data has not been loaded
+        sidebarMenu(
+          menuitem_dataload,
+          menuitem_about
+        )    
+        
+      }
       
     })
     
