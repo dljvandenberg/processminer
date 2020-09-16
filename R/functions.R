@@ -243,10 +243,9 @@ process_viewer <- function() {
           timestamp = input$timestamp_var
         ) %>% 
         eventlog()
-      print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded!"))
+      print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded"))
       print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
-      print(paste0("DEBUG: class(eventlog()): ", paste0(class(eventlog()), collapse = ", ")))
-      
+
     })
     
     
@@ -258,9 +257,8 @@ process_viewer <- function() {
       if(input$selected_example_dataset != ""){
         # Set eventlog reactive value
         eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
-        print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded!"))
+        print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded"))
         print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
-        print(paste0("DEBUG: class(eventlog()): ", paste0(class(eventlog()), collapse = ", ")))
       }
       
     })
@@ -321,6 +319,13 @@ process_viewer <- function() {
     
     output$process <- renderProcessanimater(expr = {
       
+      req(eventlog())
+      req(input$traceFrequency)
+      req(input$mapType)
+      req(input$sizeAttribute)
+      req(input$colorAttribute)
+      req(input$timelineMode)
+      
       # Filter base eventlog
       plotdata <- eventlog() %>% 
         edeaR::filter_trace_frequency(percentage = input$traceFrequency / 100)
@@ -362,6 +367,9 @@ process_viewer <- function() {
     })
     
     output$plotlydottedchart <- renderPlotly(expr = {
+      
+      req(eventlog())
+      
       processmapR::plotly_dotted_chart(eventlog())
     })
     
