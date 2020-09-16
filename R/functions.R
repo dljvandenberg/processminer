@@ -19,19 +19,10 @@ process_viewer <- function() {
   ## Header
   header <- dashboardHeader(title = "ProcessMiner")
   
+  
   ## Sidebar items
   sidebar <- dashboardSidebar(
-    sidebarMenu(
-      menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
-               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"), selected = TRUE),
-               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"))
-               ),
-      menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-      menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
-      menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
-      menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
-      menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
-    )
+    sidebarMenuOutput("sidebarmenu")
   )
   
   
@@ -149,6 +140,7 @@ process_viewer <- function() {
     
     eventlog <- reactiveVal()
     
+    
     data <- reactive({
       
       req(input$eventlogFile)
@@ -171,6 +163,24 @@ process_viewer <- function() {
       )
       
       return(exceldata)
+      
+    })
+    
+    
+    output$sidebarmenu <- renderMenu({
+      
+      # TODO_CURRENT: make menuitems dependent on whether or not eventlog() is loaded
+      sidebarMenu(
+        menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
+                 menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"), selected = TRUE),
+                 menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"))
+        ),
+        menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
+        menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
+        menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
+        menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
+        menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
+      )    
       
     })
     
