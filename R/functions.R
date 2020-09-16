@@ -7,6 +7,7 @@ library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
+library(shinyhelper)
 library(plotly)
 
 process_viewer <- function() {
@@ -108,7 +109,8 @@ process_viewer <- function() {
         solidHeader = TRUE,
         width = 12,
         p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R. It's current status is: experimental."),
+        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R."),
+        p("Its current status is: experimental."),
         p("Source code: https://github.com/dljvandenberg/processminer")
     )
   )
@@ -214,7 +216,7 @@ process_viewer <- function() {
       
       # Datasets available via eventdataR package
       # TODO: fix hardcoded available_datasets (put either in configuration or generate from available functions in eventdataR package)
-      available_datasets <- c("hospital", "hospital_billing", "patients", "sepsis", "traffic_fines")
+      available_datasets <- c("hospital_billing", "patients", "sepsis", "traffic_fines")
       
       column(width = 12,
         selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = ""),
