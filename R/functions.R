@@ -1,7 +1,9 @@
 ## Define Shiny app
 
+library(dplyr)
 library(bupaR)
 library(eventdataR)
+library(edeaR)
 library(processmapR)
 library(processanimateR)
 library(shiny)
