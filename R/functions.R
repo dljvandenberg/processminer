@@ -217,7 +217,6 @@ process_viewer <- function() {
     output$example_dataset_selector <- renderUI({
       
       # Datasets available via eventdataR package
-      # TODO: fix hardcoded available_datasets (put either in configuration or generate from available functions in eventdataR package)
       available_datasets <- c("hospital_billing", "patients", "sepsis", "traffic_fines")
       
       column(width = 12,
@@ -243,8 +242,8 @@ process_viewer <- function() {
           timestamp = input$timestamp_var
         ) %>% 
         eventlog()
-      print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded"))
-      print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
+      print(paste0("INFO: eventlog generated from data upload"))
+      print(paste0("INFO: number of lines in eventlog: ", nrow(eventlog())))
 
     })
     
@@ -257,8 +256,8 @@ process_viewer <- function() {
       if(input$selected_example_dataset != ""){
         # Set eventlog reactive value
         eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
-        print(paste0("DEBUG: eventlog ", input$selected_example_dataset, " loaded"))
-        print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
+        print(paste0("INFO: eventlog ", input$selected_example_dataset, " loaded from package eventdataR"))
+        print(paste0("INFO: number of lines in eventlog: ", nrow(eventlog())))
       }
       
     })
@@ -269,8 +268,6 @@ process_viewer <- function() {
       req(eventlog())
       
       # Don't show eventlog columns that are irrelevant to user
-      print("DEBUG: datatable from eventlog")
-      print(paste0("DEBUG: nrow(eventlog()): ", nrow(eventlog())))
       irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
       eventlog() %>%
         as.data.frame() %>% 
@@ -280,6 +277,8 @@ process_viewer <- function() {
     
     
     output$process_flow_settings_box <- renderUI({
+      
+      req(eventlog())
       
       timestamp_var <- bupaR::timestamp(eventlog())
       timestamp_min <- min(pull(eventlog(), timestamp_var))
@@ -305,12 +304,16 @@ process_viewer <- function() {
     
     output$token_selection <- renderText({
       
+      req(input$process_tokens)
+      
       paste0(input$process_tokens, ",")
       
     })
     
     
     output$activity_selection <- renderText({
+      
+      req(input$process_activities)
       
       paste0(input$process_activities, ",")
       
