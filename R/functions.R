@@ -23,8 +23,8 @@ process_viewer <- function() {
   sidebar <- dashboardSidebar(
     sidebarMenu(
       menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
-               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"), selected = TRUE),
-               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"))
+               menuSubItem(text = "Example datasets", tabName = "example_dataset", icon = icon("list"), selected = TRUE),
+               menuSubItem(text = "Data upload", tabName = "data_upload", icon = icon("upload"))
                ),
       menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
       menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
@@ -217,10 +217,10 @@ process_viewer <- function() {
     output$example_dataset_selector <- renderUI({
       
       # Datasets available via eventdataR package
-      available_datasets <- c("hospital_billing", "patients", "sepsis", "traffic_fines")
+      available_datasets <- c("patients", "hospital_billing", "sepsis", "traffic_fines")
       
       column(width = 12,
-        selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = ""),
+        selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = "patients"),
         actionButton(inputId = "load_example_eventlog_button", label = "Load eventlog")
       )
     })
