@@ -66,10 +66,12 @@ process_viewer <- function() {
            uiOutput("process_flow_settings_box")
     ),
     column(width = 9,
-           box(title = "Process flow diagram",
+           box(id = "process_box",
+               title = "Process flow diagram",
                status = "primary",
                solidHeader = TRUE,
                width = 12,
+               closable = FALSE,
                shinycssloaders::withSpinner(processanimaterOutput("process"))
            ),
            box(title = "Selected cases",
@@ -111,6 +113,29 @@ process_viewer <- function() {
 
   ## Dashboard body
   body <- dashboardBody(
+    tags$head(tags$script('
+      // Define function to set height of "process" and "process_box"
+      // See https://stackoverflow.com/questions/56965843/height-of-the-box-in-r-shiny
+      setHeight = function() {
+        var window_height = $(window).height();
+        var header_height = $(".main-header").height();
+
+        var boxHeight = window_height - header_height - 100;
+
+        $("#process_box").height(boxHeight);
+        $("#process").height(boxHeight - 30);
+      };
+
+      // Set input$box_height when the connection is established
+      $(document).on("shiny:connected", function(event) {
+        setHeight();
+      });
+
+      // Refresh the box height on every window resize event    
+      $(window).on("resize", function(){
+        setHeight();
+      });
+    ')),
     tabItems(
       tabItem(tabName = "data_upload", body_data_upload),
       tabItem(tabName = "example_dataset", body_example_dataset),
@@ -362,9 +387,9 @@ process_viewer <- function() {
       
       # Base process map
       if(input$mapType == "durations"){
-        graph <- processmapR::process_map(plotdata, render = FALSE, type = performance(units = "days"))
+        graph <- processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE, type = performance(units = "days"))
       } else {
-        graph <- processmapR::process_map(plotdata, render = FALSE)
+        graph <- processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE)
       }
       
       # Animated process map
