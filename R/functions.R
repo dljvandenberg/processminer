@@ -62,9 +62,6 @@ process_viewer <- function() {
   )
   
   body_process_flow <- fluidRow(
-    column(width = 3,
-           uiOutput("process_flow_settings_box")
-    ),
     column(width = 9,
            box(id = "process_box",
                title = "Process flow diagram",
@@ -86,6 +83,9 @@ process_viewer <- function() {
                width = 12,
                textOutput("activity_selection")
            )
+    ),
+    column(width = 3,
+           uiOutput("process_flow_settings_box")
     )
   )
   
