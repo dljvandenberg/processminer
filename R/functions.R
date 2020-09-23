@@ -71,18 +71,18 @@ process_viewer <- function() {
                closable = FALSE,
                shinycssloaders::withSpinner(processanimaterOutput("process"))
            ),
-           box(title = "Selected cases",
+           box(title = "Selected case",
                status = "primary",
                solidHeader = TRUE,
                width = 12,
-               textOutput("token_selection")
-           ),
-           box(title = "Selected activities",
-               status = "primary",
-               solidHeader = TRUE,
-               width = 12,
-               textOutput("activity_selection")
-           )
+               dataTableOutput("process_flow_selected_case")
+           )#,
+           # box(title = "Selected activities",
+           #     status = "primary",
+           #     solidHeader = TRUE,
+           #     width = 12,
+           #     textOutput("activity_selection")
+           # )
     ),
     column(width = 3,
            uiOutput("process_flow_settings_box")
@@ -358,22 +358,31 @@ process_viewer <- function() {
     })
     
     
-    output$token_selection <- renderText({
+    output$process_flow_selected_case <- renderDataTable({
       
       req(input$process_tokens)
+      req(length(input$process_tokens) >= 1)
+      req(eventlog())
       
-      paste0(input$process_tokens, ",")
-      
+      # Filter on selected case_id, drop .order column
+      case_id_var <- sym(case_id(eventlog()))
+      timestamp_var <- sym(timestamp(eventlog()))
+      eventlog() %>% 
+        filter(!!case_id_var %in% input$process_tokens) %>% 
+        as.data.frame() %>% 
+        select(-all_of(c(".order"))) %>% 
+        arrange(!!timestamp_var)
     })
     
     
-    output$activity_selection <- renderText({
-      
-      req(input$process_activities)
-      
-      paste0(input$process_activities, ",")
-      
-    })
+    # Activity details not shown at the moment
+    # output$activity_selection <- renderText({
+    #   
+    #   req(input$process_activities)
+    #   
+    #   paste0(input$process_activities, ",")
+    #   
+    # })
     
     
     output$process <- renderProcessanimater(expr = {
