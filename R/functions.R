@@ -90,7 +90,8 @@ process_viewer <- function() {
   )
   
   body_timeline_view <- fluidRow(
-    box(title = "Timeline view",
+    box(id = "timeline_box",
+        title = "Timeline view",
         status = "primary",
         solidHeader = TRUE,
         width = 12,
@@ -114,7 +115,7 @@ process_viewer <- function() {
   ## Dashboard body
   body <- dashboardBody(
     tags$head(tags$script('
-      // Define function to set height of "process" and "process_box"
+      // Define function to set height of "process_box", "process", "timeline_box" and "plotlydottedchart"
       // See https://stackoverflow.com/questions/56965843/height-of-the-box-in-r-shiny
       setHeight = function() {
         var window_height = $(window).height();
@@ -124,6 +125,9 @@ process_viewer <- function() {
 
         $("#process_box").height(boxHeight);
         $("#process").height(boxHeight - 30);
+        
+        $("#timeline_box").height(boxHeight);
+        $("#plotlydottedchart").height(boxHeight - 30);
       };
 
       // Set input$box_height when the connection is established
