@@ -261,9 +261,9 @@ process_viewer <- function() {
           solidHeader = TRUE,
           width = 12,
           # Mark relevant fields in uploaded data (case_id, timestamp, activity, additional features)
-          selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "none"),
-          selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "none"),
-          selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "none"),
+          selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "<none>"),
+          selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "<none>"),
+          selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "<none>"),
           actionButton(inputId = "generate_eventlog_from_upload_button", label = "Generate eventlog")
       )
     })
@@ -339,17 +339,23 @@ process_viewer <- function() {
       timestamp_var <- bupaR::timestamp(eventlog())
       timestamp_min <- min(pull(eventlog(), timestamp_var))
       timestamp_max <- max(pull(eventlog(), timestamp_var))
+      
+      # List of size/color attributes to choose from
+      cols <- colnames(eventlog())
+      numeric_cols <- colnames(select(as.data.frame(eventlog()), is.numeric))
+      cols_to_exclude <- c(".order", case_id(eventlog()), activity_id(eventlog()))
+      color_attribute_choices <- cols[!cols %in% cols_to_exclude]
+      size_attribute_choices <- numeric_cols[!numeric_cols %in% cols_to_exclude]
     
       box(title = "Settings",
           status = "primary",
           solidHeader = TRUE,
           width = 12,
-          
           selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-          selectInput(inputId = "sizeAttribute", label = "Size attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          selectInput(inputId = "colorAttribute", label = "Color attribute", choices = c("none", colnames(eventlog())), selected = "none"),
-          # TODO_CURRENT: add time filter option
+          selectInput(inputId = "colorAttribute", label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
+          selectInput(inputId = "sizeAttribute", label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
+          # TODO: add time filter option
           #dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
           #sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
           sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
@@ -406,7 +412,7 @@ process_viewer <- function() {
       }
       
       # Animated process map
-      if (input$sizeAttribute != "none" && input$colorAttribute != "none") {
+      if (input$sizeAttribute != "<none>" && input$colorAttribute != "<none>") {
         animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "color",
@@ -414,13 +420,13 @@ process_viewer <- function() {
                                                                 range = RColorBrewer::brewer.pal(5, "YlOrBr")),
                                             size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
-      } else if (input$sizeAttribute != "none") {
+      } else if (input$sizeAttribute != "<none>") {
         animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "size",
                         mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
                         token_callback_select = token_select_decoration(stroke = "red"))
-      } else if (input$colorAttribute != "none") {
+      } else if (input$colorAttribute != "<none>") {
         animate_process(plotdata, graph,
                         mode = input$timelineMode,
                         legend = "color",
