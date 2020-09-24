@@ -174,16 +174,14 @@ process_viewer <- function() {
       
       req(input$eventlogFile)
       
+      # TODO: Read csv files
+      
       # when reading semicolon separated files,
       # having a comma separator causes `read.csv` to error
       tryCatch(
         {
-          # TODO: Remove data-specific configuration
-          exceldata <- readxl::read_excel(input$eventlogFile$datapath, skip = 1) %>% 
-            dplyr::rename_all(funs(make.names(.))) %>%
-            select('Zaaknummer', 'Zaaktype', 'Product', 'Datum.afhandeling', 'Onderdeel') %>% 
-            filter(Product == "Vergunning WaterWet") %>% 
-            arrange(Zaaknummer, Datum.afhandeling, Onderdeel)
+          exceldata <- readxl::read_excel(input$eventlogFile$datapath) %>% 
+            dplyr::rename_all(funs(make.names(.)))
         },
         error = function(e) {
           # return a safeError if a parsing error occurs
@@ -264,6 +262,7 @@ process_viewer <- function() {
           selectInput(inputId = "case_id_var", label = "Select case_id column", choices = available_variables, selected = "<none>"),
           selectInput(inputId = "timestamp_var", label = "Select timestamp column", choices = available_variables, selected = "<none>"),
           selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "<none>"),
+          # selectInput(inputId = "activity_var", label = "Select activity column", choices = available_variables, selected = "<none>"),
           actionButton(inputId = "generate_eventlog_from_upload_button", label = "Generate eventlog")
       )
     })
@@ -355,7 +354,6 @@ process_viewer <- function() {
           selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
           selectInput(inputId = "colorAttribute", label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
           selectInput(inputId = "sizeAttribute", label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
-          # TODO: add time filter option
           #dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
           #sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
           sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
