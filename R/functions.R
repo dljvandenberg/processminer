@@ -11,6 +11,7 @@ library(shinydashboard)
 library(shinycssloaders)
 library(shinyhelper)
 library(plotly)
+library(RColorBrewer)
 
 process_viewer <- function() {
   
