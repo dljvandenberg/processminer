@@ -423,14 +423,14 @@ process_viewer <- function() {
         # If ordinal, count unique classes
         n_unique_colorvalues <- length(unique(pull(plotdata, input$colorAttribute)))
         
-        if ("POSIXct" %in% class(plotdata[[input$colorAttribute]])) {
-          print("INFO: colorAttribute has date format")
+        if (input$colorAttribute == timestamp(plotdata)) {
+          print("INFO: colorAttribute is timestamp variable.")
           
           # Add time bins manually
           n_bins <- 5
           min_datetime <- min(plotdata[[input$colorAttribute]])
           max_datetime <- max(plotdata[[input$colorAttribute]])
-          datetime_bins <- min_datetime + (seq(n_bins + 1) / (n_bins + 1)) * (max_datetime - min_datetime)
+          datetime_bins <- min_datetime + (seq(from = 0, to = n_bins) / n_bins) * (max_datetime - min_datetime)
           case_ids <- unique(plotdata[[case_id(plotdata)]])
           # Create dataframe with case, time, value columns (to feed into token_scale for custom coloring)
           df_datetime_bins <- data.frame(time = datetime_bins) %>% 
