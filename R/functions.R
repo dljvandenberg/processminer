@@ -2,6 +2,7 @@
 
 library(dplyr)
 library(tidyr)
+library(lubridate)
 library(bupaR)
 library(eventdataR)
 library(edeaR)
@@ -437,7 +438,7 @@ process_viewer <- function() {
           # Create dataframe with case, time, value columns (to feed into token_scale for custom coloring)
           df_datetime_bins <- data.frame(time = datetime_bins) %>% 
             arrange(time) %>% 
-            mutate(value = paste0(as.character(date(time)), " to ", as.character(date(lead(time))))) %>% 
+            mutate(value = paste0(as.character(lubridate::date(time)), " to ", as.character(lubridate::date(lead(time))))) %>% 
             head(n_bins) %>% 
             crossing(data.frame(case = case_ids))
           # Use datetime_bins for color mapping
