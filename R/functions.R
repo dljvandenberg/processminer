@@ -409,33 +409,30 @@ process_viewer <- function() {
         graph <- processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE)
       }
       
-      # Animated process map
-      if (input$sizeAttribute != "<none>" && input$colorAttribute != "<none>") {
-        animate_process(plotdata, graph,
-                        mode = input$timelineMode,
-                        legend = "color",
-                        mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", 
-                                                                range = RColorBrewer::brewer.pal(5, "YlOrBr")),
-                                            size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        token_callback_select = token_select_decoration(stroke = "red"))
-      } else if (input$sizeAttribute != "<none>") {
-        animate_process(plotdata, graph,
-                        mode = input$timelineMode,
-                        legend = "size",
-                        mapping = token_aes(size = token_scale(input$sizeAttribute, scale = "linear", range = c(6,10))),
-                        token_callback_select = token_select_decoration(stroke = "red"))
-      } else if (input$colorAttribute != "<none>") {
-        animate_process(plotdata, graph,
-                        mode = input$timelineMode,
-                        legend = "color",
-                        mapping = token_aes(color = token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))),
-                        token_callback_select = token_select_decoration(stroke = "red"))
-      } else {
-        animate_process(plotdata, graph,
-                        mode = input$timelineMode,
-                        token_callback_select = token_select_decoration(stroke = "red"))
+      # Default legend settings
+      size_mapping <- token_scale()
+      color_mapping <- token_scale()
+      legend_type <- NULL
+      
+      # Set size mapping
+      if (input$sizeAttribute != "<none>" & input$sizeAttribute %in% colnames(eventlog())) {
+        size_mapping <- token_scale(input$sizeAttribute, scale = "linear", range = c(2,10))
+        legend_type <- "size"
       }
       
+      # Set color mapping
+      if (input$colorAttribute != "<none>" & input$colorAttribute %in% colnames(eventlog())) {
+        color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))
+        legend_type <- "color"
+      }
+      
+      # Animated process map 
+      animate_process(eventlog = plotdata, 
+                      processmap = graph,
+                      mode = input$timelineMode,
+                      legend = legend_type,
+                      mapping = token_aes(color = color_mapping, size = size_mapping),
+                      token_callback_select = token_select_decoration(stroke = "red"))
     })
     
     output$plotlydottedchart <- renderPlotly(expr = {
