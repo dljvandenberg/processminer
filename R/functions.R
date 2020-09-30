@@ -412,23 +412,44 @@ process_viewer <- function() {
       }
       
       # Set size mapping
-      if (input$sizeAttribute != "<none>" & input$sizeAttribute %in% colnames(eventlog())) {
+      if (input$sizeAttribute != "<none>" & input$sizeAttribute %in% colnames(plotdata)) {
         size_mapping <- token_scale(input$sizeAttribute, scale = "linear", range = c(2,10))
         legend_type <- "size"
       }
       
       # Set color mapping
-      if (input$colorAttribute != "<none>" & input$colorAttribute %in% colnames(eventlog())) {
-        # TODO_CURRENT: choose better color scale
+      if (input$colorAttribute != "<none>" & input$colorAttribute %in% colnames(plotdata)) {
         
-        # Creates a generic color function: generic_color_function(n_colors)
-        generic_color_function <- colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrBr"))
+        # If ordinal, count unique classes
+        n_unique_colorvalues <- length(unique(pull(plotdata, input$colorAttribute)))
         
-        # If ordinal, count unique classes. Problem: YlOrBr only has up to 9 unique colors
-        n_unique_colorvalues <- length(unique(pull(eventlog(), input$colorAttribute)))
+        if ("POSIXct" %in% class(plotdata[[input$colorAttribute]])) {
+          print("INFO: colorAttribute has date format")
+          
+          # Add time bins manually
+          n_bins <- 5
+          min_datetime <- min(plotdata[[input$colorAttribute]])
+          max_datetime <- max(plotdata[[input$colorAttribute]])
+          datetime_bins <- min_datetime + (seq(n_bins + 1) / (n_bins + 1)) * (max_datetime - min_datetime)
+          case_ids <- unique(plotdata[[case_id(plotdata)]])
+          # Create dataframe with case, time, value columns (to feed into token_scale for custom coloring)
+          df_datetime_bins <- data.frame(time = datetime_bins) %>% 
+            arrange(time) %>% 
+            mutate(value = paste0(as.character(date(time)), " to ", as.character(date(lead(time))))) %>% 
+            head(n_bins) %>% 
+            crossing(data.frame(case = case_ids))
+          # Use datetime_bins for color mapping
+          color_mapping <- token_scale(df_datetime_bins, scale = "ordinal", range = RColorBrewer::brewer.pal(n_bins, "YlOrBr"))
+          
+        } else if (n_unique_colorvalues <= 11) {
+          # Use Spectral palette for ordinal scale up to 11 classes
+          color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = rev(RColorBrewer::brewer.pal(n_unique_colorvalues, "Spectral")))
+          
+        } else {
+          # Use Spectral palette with 5 quantized bins otherwise
+          color_mapping <- token_scale(input$colorAttribute, scale = "quantize", range = rev(RColorBrewer::brewer.pal(5, "Spectral")))
+        }
         
-        # Define color mapping
-        color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = generic_color_function(n_unique_colorvalues))
         legend_type <- "color"
       }
       
