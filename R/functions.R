@@ -419,7 +419,16 @@ process_viewer <- function() {
       
       # Set color mapping
       if (input$colorAttribute != "<none>" & input$colorAttribute %in% colnames(eventlog())) {
-        color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = RColorBrewer::brewer.pal(5, "YlOrBr"))
+        # TODO_CURRENT: choose better color scale
+        
+        # Creates a generic color function: generic_color_function(n_colors)
+        generic_color_function <- colorRampPalette(RColorBrewer::brewer.pal(9, "YlOrBr"))
+        
+        # If ordinal, count unique classes. Problem: YlOrBr only has up to 9 unique colors
+        n_unique_colorvalues <- length(unique(pull(eventlog(), input$colorAttribute)))
+        
+        # Define color mapping
+        color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = generic_color_function(n_unique_colorvalues))
         legend_type <- "color"
       }
       
