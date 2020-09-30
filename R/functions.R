@@ -297,8 +297,7 @@ process_viewer <- function() {
           timestamp = input$timestamp_var
         ) %>% 
         eventlog()
-      print(paste0("INFO: eventlog generated from data upload"))
-      print(paste0("INFO: number of lines in eventlog: ", nrow(eventlog())))
+      print(paste0("INFO: eventlog generated from data upload (containing ", nrow(eventlog()), " lines)"))
 
     })
     
@@ -311,8 +310,7 @@ process_viewer <- function() {
       if(input$selected_example_dataset != ""){
         # Set eventlog reactive value
         eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
-        print(paste0("INFO: eventlog ", input$selected_example_dataset, " loaded from package eventdataR"))
-        print(paste0("INFO: number of lines in eventlog: ", nrow(eventlog())))
+        print(paste0("INFO: '", input$selected_example_dataset, "' eventlog loaded from package eventdataR (containing ", nrow(eventlog()), " lines)"))
       }
       
     })
