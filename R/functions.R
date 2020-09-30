@@ -1,6 +1,7 @@
 ## Define Shiny app
 
 library(dplyr)
+library(tidyr)
 library(bupaR)
 library(eventdataR)
 library(edeaR)
