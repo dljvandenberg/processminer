@@ -214,7 +214,7 @@ process_viewer <- function() {
         sidebarMenu(
           menuitem_dataload,
           menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-          menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
+          #menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),   # TODO: add summary stats tab
           menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
           menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
           menuitem_about
