@@ -15,6 +15,22 @@ library(shinyhelper)
 library(plotly)
 library(RColorBrewer)
 
+
+# Add 'time_since_start' column to eventlog
+add_time_since_case_start <- function(eventlog, units = "days") {
+  # Determine timestamp variable from eventlog
+  timestamp_var <- sym(bupaR::timestamp(eventlog))
+  
+  # Add time_since_start per event, since case start
+  eventlog_extended <- eventlog %>% 
+    bupaR::group_by_case() %>% 
+    mutate(time_since_start = difftime(!!timestamp_var, min(!!timestamp_var, na.rm = TRUE), units = units)) %>% 
+    bupaR::ungroup_eventlog()
+  
+  return(eventlog_extended)
+}
+
+
 process_viewer <- function() {
   
   ### UI code ###
@@ -292,7 +308,7 @@ process_viewer <- function() {
       req(input$timestamp_var %in% colnames(data()))
       req(input$activity_var %in% colnames(data()))
 
-      # Set eventlog reactive value from data
+      # Create eventlog from data and save to 'eventlog' reactive value
       data() %>%
         simple_eventlog(
           case_id = input$case_id_var,
@@ -300,6 +316,12 @@ process_viewer <- function() {
           timestamp = input$timestamp_var
         ) %>% 
         eventlog()
+      
+      # Add time_since_start column to eventlog and set reactive value
+      eventlog() %>% 
+        add_time_since_case_start() %>% 
+        eventlog()
+      
       print(paste0("INFO: eventlog generated from data upload (containing ", nrow(eventlog()), " lines)"))
 
     })
@@ -313,6 +335,12 @@ process_viewer <- function() {
       if(input$selected_example_dataset != ""){
         # Set eventlog reactive value
         eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
+        
+        # Add time_since_start column to eventlog and set reactive value
+        eventlog() %>% 
+          add_time_since_case_start() %>% 
+          eventlog()
+        
         print(paste0("INFO: '", input$selected_example_dataset, "' eventlog loaded from package eventdataR (containing ", nrow(eventlog()), " lines)"))
       }
       
