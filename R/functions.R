@@ -400,17 +400,16 @@ process_viewer <- function() {
       plotdata <- eventlog() %>% 
         edeaR::filter_trace_frequency(percentage = input$traceFrequency / 100)
       
-      # Base process map
-      if(input$mapType == "durations"){
-        graph <- processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE, type = performance(units = "days"))
-      } else {
-        graph <- processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE)
-      }
-      
-      # Default legend settings
+      # Default process map settings
+      map_type <- frequency("absolute")
       size_mapping <- token_scale()
       color_mapping <- token_scale()
       legend_type <- NULL
+      
+      # Set map type
+      if(input$mapType == "durations"){
+        map_type <- performance(units = "days")
+      }
       
       # Set size mapping
       if (input$sizeAttribute != "<none>" & input$sizeAttribute %in% colnames(eventlog())) {
@@ -426,7 +425,7 @@ process_viewer <- function() {
       
       # Animated process map 
       animate_process(eventlog = plotdata, 
-                      processmap = graph,
+                      processmap = processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE, type = map_type),
                       mode = input$timelineMode,
                       legend = legend_type,
                       mapping = token_aes(color = color_mapping, size = size_mapping),
