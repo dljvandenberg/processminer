@@ -77,7 +77,19 @@ process_viewer <- function() {
   )  
   
   body_summary_statistics <- fluidRow(
-    box("TODO")
+    
+    box(title = "Cases per activity",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotlyOutput("stats_cases"))
+        ),
+    box(title = "Events per activity",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotlyOutput("stats_events"))
+    )
   )
   
   body_process_flow <- fluidRow(
@@ -226,7 +238,7 @@ process_viewer <- function() {
         sidebarMenu(
           menuitem_dataload,
           menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-          #menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),   # TODO: add summary stats tab
+          menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
           menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
           menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
           menuitem_about
@@ -353,6 +365,36 @@ process_viewer <- function() {
         as.data.frame() %>% 
         select(-any_of(irrelevant_cols))
       
+    })
+    
+    
+    output$stats_cases <- plotly::renderPlotly({
+      
+      req(eventlog())
+      
+      activity_var <- sym(bupaR::activity_id(eventlog()))
+      eventlog() %>% 
+        bupaR::group_by_activity() %>% 
+        bupaR::n_cases() %>% 
+        {ggplot(., aes(x = !!activity_var, y = n_cases)) +
+            geom_col(fill = 'darkblue') +
+            coord_flip()} %>% 
+        ggplotly()
+    })
+    
+    
+    output$stats_events <- plotly::renderPlotly({
+      
+      req(eventlog())
+      
+      activity_var <- sym(bupaR::activity_id(eventlog()))
+      eventlog() %>% 
+        bupaR::group_by_activity() %>% 
+        bupaR::n_events() %>% 
+        {ggplot(., aes(x = !!activity_var, y = n_events)) +
+            geom_col(fill = 'darkblue') +
+            coord_flip()} %>% 
+        ggplotly()
     })
     
     
