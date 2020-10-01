@@ -89,6 +89,12 @@ process_viewer <- function() {
         solidHeader = TRUE,
         width = 6,
         shinycssloaders::withSpinner(plotlyOutput("stats_events"))
+    ),
+    box(title = "Summary stats",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(tableOutput("stats_table"))
     )
   )
   
@@ -378,6 +384,7 @@ process_viewer <- function() {
         bupaR::n_cases() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_cases)) +
             geom_col(fill = 'darkblue') +
+            ylab('Number of cases') +
             coord_flip()} %>% 
         ggplotly()
     })
@@ -393,9 +400,24 @@ process_viewer <- function() {
         bupaR::n_events() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_events)) +
             geom_col(fill = 'darkblue') +
+            ylab('Number of events') +
             coord_flip()} %>% 
         ggplotly()
     })
+    
+    
+    output$stats_table <- shiny::renderTable({
+      
+      req(eventlog())
+
+      # TODO_CURRENT: display in summary stats tab
+      n_cases <- bupaR::n_cases(eventlog())
+      n_events <- bupaR::n_events(eventlog())
+      n_activities <- bupaR::n_activities(eventlog())
+      
+      data.frame(Statistic = c('Unique activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
+    })
+    
     
     
     output$process_flow_settings_box <- renderUI({
