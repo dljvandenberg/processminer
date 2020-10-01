@@ -193,10 +193,6 @@ process_viewer <- function() {
       
       req(input$eventlogFile)
       
-      # TODO: Read csv files
-      
-      # when reading semicolon separated files,
-      # having a comma separator causes `read.csv` to error
       tryCatch(
         {
           exceldata <- readxl::read_excel(input$eventlogFile$datapath) %>% 
