@@ -210,6 +210,8 @@ process_viewer <- function() {
     
     options(shiny.maxRequestSize=30*1024^2)
     
+    default_color <- 'skyblue2'
+    
     eventlog <- reactiveVal()
     
     
@@ -389,7 +391,7 @@ process_viewer <- function() {
         bupaR::group_by_activity() %>% 
         bupaR::n_cases() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_cases)) +
-            geom_col(fill = 'skyblue2') +
+            geom_col(fill = default_color) +
             ylab('Number of cases') +
             coord_flip()} %>% 
         ggplotly()
@@ -405,7 +407,7 @@ process_viewer <- function() {
         bupaR::group_by_activity() %>% 
         bupaR::n_events() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_events)) +
-            geom_col(fill = 'skyblue2') +
+            geom_col(fill = default_color) +
             ylab('Number of events') +
             coord_flip()} %>% 
         ggplotly()
