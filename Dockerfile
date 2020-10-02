@@ -9,6 +9,7 @@ RUN R -e "install.packages('magrittr', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('glue', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('DT', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('plotly', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('bupaR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('eventdataR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('edeaR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('processmapR', repos='http://cran.rstudio.com/')"
@@ -16,6 +17,7 @@ RUN R -e "install.packages('processanimateR', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('shinycssloaders', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('shinydashboard', repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages('shinyhelper', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('RColorBrewer', repos='http://cran.rstudio.com/')"
 
 COPY processminer.Rproj /srv/shiny-server/
 COPY app.R /srv/shiny-server/app.R

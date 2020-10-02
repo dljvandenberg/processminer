@@ -1,33 +1,27 @@
-# Process Mining Exploration Tool
+# ProcessMiner
 
 
-## Project description
+## Description
 
-The goal of this project is to build a simple web-based process mining tool for exploration (and potentially prediction).
+ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction).
 
+It was created by Dennis van den Berg and uses the bupaR process mining library in R, with a UI built in R Shiny.
 
-## Requirements
-
-The web interface should allow the user to:
-
-- Upload an eventlog
-- Mark relevant fields (case_id, timestamp, activity, additional features)
-- Select desired views
-- Visualize: process flows, throughput times, used resources, timelines, etc.
-- Download an analysis report
-
-Potentially, we could consider adding prediction models for throughput times, success/failure per case, etc.
+Its current status is: experimental
 
 
-## Design
+## Features
 
-We intend to use the following stack:
+The web interface allows the user to:
 
-- R code
-- Dashboard in RShiny
-- Containerized using Docker image
-- Potentially deployed on Azure
+- Upload an eventlog and mark relevant fields (case_id, timestamp, activity)
+- Alternatively, select example eventlogs
+- View the raw data
+- View summary statistics (such as number of cases, events, activities, distribution of throughput times)
+- Interactively generate animated process flows
+- Generate timeline views of events
 
+We will consider adding prediction models for throughput times, success/failure per case, etc in future releases.
 
 
 ## Maintainer
