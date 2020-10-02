@@ -90,6 +90,12 @@ process_viewer <- function() {
         width = 6,
         shinycssloaders::withSpinner(plotlyOutput("stats_events"))
     ),
+    box(title = "Throughput times per case",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotOutput("throughput_time_plot"))
+    ),
     box(title = "Summary stats",
         status = "primary",
         solidHeader = TRUE,
@@ -383,7 +389,7 @@ process_viewer <- function() {
         bupaR::group_by_activity() %>% 
         bupaR::n_cases() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_cases)) +
-            geom_col(fill = 'darkblue') +
+            geom_col(fill = 'skyblue2') +
             ylab('Number of cases') +
             coord_flip()} %>% 
         ggplotly()
@@ -399,10 +405,21 @@ process_viewer <- function() {
         bupaR::group_by_activity() %>% 
         bupaR::n_events() %>% 
         {ggplot(., aes(x = !!activity_var, y = n_events)) +
-            geom_col(fill = 'darkblue') +
+            geom_col(fill = 'skyblue2') +
             ylab('Number of events') +
             coord_flip()} %>% 
         ggplotly()
+    })
+    
+    
+    output$throughput_time_plot <- renderPlot({
+      
+      req(eventlog())
+      
+      eventlog() %>% 
+        edeaR::throughput_time(level = "case") %>% 
+        plot()
+      
     })
     
     
@@ -410,12 +427,11 @@ process_viewer <- function() {
       
       req(eventlog())
 
-      # TODO_CURRENT: display in summary stats tab
       n_cases <- bupaR::n_cases(eventlog())
       n_events <- bupaR::n_events(eventlog())
       n_activities <- bupaR::n_activities(eventlog())
       
-      data.frame(Statistic = c('Unique activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
+      data.frame(Statistic = c('Number of activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
     })
     
     
