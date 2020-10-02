@@ -1,6 +1,8 @@
 ## Define Shiny app
 
 library(dplyr)
+library(tidyr)
+library(lubridate)
 library(bupaR)
 library(eventdataR)
 library(edeaR)
@@ -12,6 +14,22 @@ library(shinycssloaders)
 library(shinyhelper)
 library(plotly)
 library(RColorBrewer)
+
+
+# Add 'time_since_start' column to eventlog
+add_time_since_case_start <- function(eventlog, units = "days") {
+  # Determine timestamp variable from eventlog
+  timestamp_var <- sym(bupaR::timestamp(eventlog))
+  
+  # Add time_since_start per event, since case start
+  eventlog_extended <- eventlog %>% 
+    bupaR::group_by_case() %>% 
+    mutate(time_since_start = difftime(!!timestamp_var, min(!!timestamp_var, na.rm = TRUE), units = units)) %>% 
+    bupaR::ungroup_eventlog()
+  
+  return(eventlog_extended)
+}
+
 
 process_viewer <- function() {
   
@@ -59,7 +77,31 @@ process_viewer <- function() {
   )  
   
   body_summary_statistics <- fluidRow(
-    box("TODO")
+    
+    box(title = "Cases per activity",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotlyOutput("stats_cases"))
+        ),
+    box(title = "Events per activity",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotlyOutput("stats_events"))
+    ),
+    box(title = "Throughput times per case",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(plotOutput("throughput_time_plot"))
+    ),
+    box(title = "Summary stats",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 6,
+        shinycssloaders::withSpinner(tableOutput("stats_table"))
+    )
   )
   
   body_process_flow <- fluidRow(
@@ -106,8 +148,8 @@ process_viewer <- function() {
         solidHeader = TRUE,
         width = 12,
         p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R."),
-        p("Its current status is: experimental."),
+        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R, with a UI built in R Shiny."),
+        p("Its current status is: experimental"),
         p("Source code: https://github.com/dljvandenberg/processminer")
     )
   )
@@ -168,6 +210,8 @@ process_viewer <- function() {
     
     options(shiny.maxRequestSize=30*1024^2)
     
+    default_color <- 'skyblue2'
+    
     eventlog <- reactiveVal()
     
     
@@ -175,10 +219,6 @@ process_viewer <- function() {
       
       req(input$eventlogFile)
       
-      # TODO: Read csv files
-      
-      # when reading semicolon separated files,
-      # having a comma separator causes `read.csv` to error
       tryCatch(
         {
           exceldata <- readxl::read_excel(input$eventlogFile$datapath) %>% 
@@ -290,7 +330,7 @@ process_viewer <- function() {
       req(input$timestamp_var %in% colnames(data()))
       req(input$activity_var %in% colnames(data()))
 
-      # Set eventlog reactive value from data
+      # Create eventlog from data and save to 'eventlog' reactive value
       data() %>%
         simple_eventlog(
           case_id = input$case_id_var,
@@ -298,6 +338,12 @@ process_viewer <- function() {
           timestamp = input$timestamp_var
         ) %>% 
         eventlog()
+      
+      # Add time_since_start column to eventlog and set reactive value
+      eventlog() %>% 
+        add_time_since_case_start() %>% 
+        eventlog()
+      
       print(paste0("INFO: eventlog generated from data upload (containing ", nrow(eventlog()), " lines)"))
 
     })
@@ -311,6 +357,12 @@ process_viewer <- function() {
       if(input$selected_example_dataset != ""){
         # Set eventlog reactive value
         eventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
+        
+        # Add time_since_start column to eventlog and set reactive value
+        eventlog() %>% 
+          add_time_since_case_start() %>% 
+          eventlog()
+        
         print(paste0("INFO: '", input$selected_example_dataset, "' eventlog loaded from package eventdataR (containing ", nrow(eventlog()), " lines)"))
       }
       
@@ -328,6 +380,62 @@ process_viewer <- function() {
         select(-any_of(irrelevant_cols))
       
     })
+    
+    
+    output$stats_cases <- plotly::renderPlotly({
+      
+      req(eventlog())
+      
+      activity_var <- sym(bupaR::activity_id(eventlog()))
+      eventlog() %>% 
+        bupaR::group_by_activity() %>% 
+        bupaR::n_cases() %>% 
+        {ggplot(., aes(x = !!activity_var, y = n_cases)) +
+            geom_col(fill = default_color) +
+            ylab('Number of cases') +
+            coord_flip()} %>% 
+        ggplotly()
+    })
+    
+    
+    output$stats_events <- plotly::renderPlotly({
+      
+      req(eventlog())
+      
+      activity_var <- sym(bupaR::activity_id(eventlog()))
+      eventlog() %>% 
+        bupaR::group_by_activity() %>% 
+        bupaR::n_events() %>% 
+        {ggplot(., aes(x = !!activity_var, y = n_events)) +
+            geom_col(fill = default_color) +
+            ylab('Number of events') +
+            coord_flip()} %>% 
+        ggplotly()
+    })
+    
+    
+    output$throughput_time_plot <- renderPlot({
+      
+      req(eventlog())
+      
+      eventlog() %>% 
+        edeaR::throughput_time(level = "case") %>% 
+        plot()
+      
+    })
+    
+    
+    output$stats_table <- shiny::renderTable({
+      
+      req(eventlog())
+
+      n_cases <- bupaR::n_cases(eventlog())
+      n_events <- bupaR::n_events(eventlog())
+      n_activities <- bupaR::n_activities(eventlog())
+      
+      data.frame(Statistic = c('Number of activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
+    })
+    
     
     
     output$process_flow_settings_box <- renderUI({
@@ -436,7 +544,7 @@ process_viewer <- function() {
           # Create dataframe with case, time, value columns (to feed into token_scale for custom coloring)
           df_datetime_bins <- data.frame(time = datetime_bins) %>% 
             arrange(time) %>% 
-            mutate(value = paste0(as.character(date(time)), " to ", as.character(date(lead(time))))) %>% 
+            mutate(value = paste0(as.character(lubridate::date(time)), " to ", as.character(lubridate::date(lead(time))))) %>% 
             head(n_bins) %>% 
             crossing(data.frame(case = case_ids))
           # Use datetime_bins for color mapping
