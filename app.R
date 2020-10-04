@@ -1,4 +1,4 @@
-source('R/mod_eventlogsummary.R')
+source('R/mod_eventlog_summary.R')
 source('R/mod_processflow.R')
 source('R/mod_eventlog_timeline.R')
 source('R/ui.R')
