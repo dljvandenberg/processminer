@@ -83,7 +83,7 @@ server <- function(session, input, output) {
                 menuitem_dataload,
                 menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
                 callModule(eventlogSummary, "summary_stats_1", myeventlog = reactive(eventlog())),
-                menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
+                callModule(processFlow, "process_flow_1", eventlog = reactive(eventlog())),
                 menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
                 menuitem_about
             )    
@@ -211,129 +211,6 @@ server <- function(session, input, output) {
         
     })
     
-    
-    output$process_flow_settings_box <- renderUI({
-        
-        req(eventlog())
-        
-        timestamp_var <- bupaR::timestamp(eventlog())
-        timestamp_min <- min(pull(eventlog(), timestamp_var))
-        timestamp_max <- max(pull(eventlog(), timestamp_var))
-        
-        # List of size/color attributes to choose from
-        cols <- colnames(eventlog())
-        numeric_cols <- colnames(select(as.data.frame(eventlog()), is.numeric))
-        cols_to_exclude <- c(".order", case_id(eventlog()), activity_id(eventlog()))
-        color_attribute_choices <- cols[!cols %in% cols_to_exclude]
-        size_attribute_choices <- numeric_cols[!numeric_cols %in% cols_to_exclude]
-        
-        box(title = "Settings",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            selectInput(inputId = "mapType", label = "Map type", choices = c("cases", "durations"), selected = "cases"),
-            selectInput(inputId = "timelineMode", label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-            selectInput(inputId = "colorAttribute", label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
-            selectInput(inputId = "sizeAttribute", label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
-            #dateRangeInput(inputId = "dateRange", label = "Date range", min = timestamp_min, max = timestamp_max),
-            #sliderInput(inputId = "timeRange", label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
-            sliderInput(inputId = "traceFrequency", label = "Filter trace frequency (%)", min = 10, max = 100, step = 5, value = 100)
-        )
-        
-    })
-    
-    
-    output$process_flow_selected_case <- renderDataTable({
-        
-        req(input$process_tokens)
-        req(length(input$process_tokens) >= 1)
-        req(eventlog())
-        
-        # Filter on selected case_id, drop .order column
-        case_id_var <- sym(case_id(eventlog()))
-        timestamp_var <- sym(timestamp(eventlog()))
-        eventlog() %>% 
-            filter(!!case_id_var %in% input$process_tokens) %>% 
-            as.data.frame() %>% 
-            select(-all_of(c(".order"))) %>% 
-            arrange(!!timestamp_var)
-    })
-    
-    
-    output$process <- renderProcessanimater(expr = {
-        
-        req(eventlog())
-        req(input$traceFrequency)
-        req(input$mapType)
-        req(input$sizeAttribute)
-        req(input$colorAttribute)
-        req(input$timelineMode)
-        
-        # Filter base eventlog
-        plotdata <- eventlog() %>% 
-            edeaR::filter_trace_frequency(percentage = input$traceFrequency / 100)
-        
-        # Default process map settings
-        map_type <- frequency("absolute")
-        size_mapping <- token_scale()
-        color_mapping <- token_scale()
-        legend_type <- NULL
-        
-        # Set map type
-        if(input$mapType == "durations"){
-            map_type <- performance(units = "days")
-        }
-        
-        # Set size mapping
-        if (input$sizeAttribute != "<none>" & input$sizeAttribute %in% colnames(plotdata)) {
-            size_mapping <- token_scale(input$sizeAttribute, scale = "linear", range = c(2,10))
-            legend_type <- "size"
-        }
-        
-        # Set color mapping
-        if (input$colorAttribute != "<none>" & input$colorAttribute %in% colnames(plotdata)) {
-            
-            # If ordinal, count unique classes
-            n_unique_colorvalues <- length(unique(pull(plotdata, input$colorAttribute)))
-            
-            if (input$colorAttribute == timestamp(plotdata)) {
-                print("INFO: colorAttribute is timestamp variable.")
-                
-                # Add time bins manually
-                n_bins <- 5
-                min_datetime <- min(plotdata[[input$colorAttribute]])
-                max_datetime <- max(plotdata[[input$colorAttribute]])
-                datetime_bins <- min_datetime + (seq(from = 0, to = n_bins) / n_bins) * (max_datetime - min_datetime)
-                case_ids <- unique(plotdata[[case_id(plotdata)]])
-                # Create dataframe with case, time, value columns (to feed into token_scale for custom coloring)
-                df_datetime_bins <- data.frame(time = datetime_bins) %>% 
-                    arrange(time) %>% 
-                    mutate(value = paste0(as.character(lubridate::date(time)), " to ", as.character(lubridate::date(lead(time))))) %>% 
-                    head(n_bins) %>% 
-                    crossing(data.frame(case = case_ids))
-                # Use datetime_bins for color mapping
-                color_mapping <- token_scale(df_datetime_bins, scale = "ordinal", range = RColorBrewer::brewer.pal(n_bins, "YlOrBr"))
-                
-            } else if (n_unique_colorvalues <= 11) {
-                # Use Spectral palette for ordinal scale up to 11 classes
-                color_mapping <- token_scale(input$colorAttribute, scale = "ordinal", range = rev(RColorBrewer::brewer.pal(n_unique_colorvalues, "Spectral")))
-                
-            } else {
-                # Use Spectral palette with 5 quantized bins otherwise
-                color_mapping <- token_scale(input$colorAttribute, scale = "quantize", range = rev(RColorBrewer::brewer.pal(5, "Spectral")))
-            }
-            
-            legend_type <- "color"
-        }
-        
-        # Animated process map 
-        animate_process(eventlog = plotdata, 
-                        processmap = processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE, type = map_type),
-                        mode = input$timelineMode,
-                        legend = legend_type,
-                        mapping = token_aes(color = color_mapping, size = size_mapping),
-                        token_callback_select = token_select_decoration(stroke = "red"))
-    })
     
     output$plotlydottedchart <- renderPlotly(expr = {
         

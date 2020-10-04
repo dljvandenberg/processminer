@@ -60,28 +60,6 @@ body_table_view <- fluidRow(
     )
 )  
 
-body_process_flow <- fluidRow(
-    column(width = 9,
-           box(id = "process_box",
-               title = "Process flow diagram",
-               status = "primary",
-               solidHeader = TRUE,
-               width = 12,
-               closable = FALSE,
-               shinycssloaders::withSpinner(processanimaterOutput("process"))
-           ),
-           box(title = "Selected case",
-               status = "primary",
-               solidHeader = TRUE,
-               width = 12,
-               dataTableOutput("process_flow_selected_case")
-           )
-    ),
-    column(width = 3,
-           uiOutput("process_flow_settings_box")
-    )
-)
-
 body_timeline_view <- fluidRow(
     box(id = "timeline_box",
         title = "Timeline view",
@@ -138,7 +116,7 @@ body <- dashboardBody(
         tabItem(tabName = "example_dataset", body_example_dataset),
         tabItem(tabName = "table_view", body_table_view),
         eventlogSummaryUI(id = "summary_stats_1"),
-        tabItem(tabName = "process_flow", body_process_flow),
+        processFlowUI(id = "process_flow_1"),
         tabItem(tabName = "timeline_view", body_timeline_view),
         tabItem(tabName = "about_this_app", body_about_this_app)
     )
