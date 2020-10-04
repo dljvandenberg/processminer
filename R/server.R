@@ -84,7 +84,7 @@ server <- function(session, input, output) {
                 menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
                 callModule(eventlogSummary, "summary_stats_1", myeventlog = reactive(eventlog())),
                 callModule(processFlow, "process_flow_1", eventlog = reactive(eventlog())),
-                menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
+                callModule(eventsTimeline, "events_timeline_1", eventlog = reactive(eventlog())),
                 menuitem_about
             )    
             
@@ -209,14 +209,6 @@ server <- function(session, input, output) {
             as.data.frame() %>% 
             select(-any_of(irrelevant_cols))
         
-    })
-    
-    
-    output$plotlydottedchart <- renderPlotly(expr = {
-        
-        req(eventlog())
-        
-        processmapR::plotly_dotted_chart(eventlog())
     })
     
 }

@@ -60,16 +60,6 @@ body_table_view <- fluidRow(
     )
 )  
 
-body_timeline_view <- fluidRow(
-    box(id = "timeline_box",
-        title = "Timeline view",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        shinycssloaders::withSpinner(plotlyOutput("plotlydottedchart"))
-    ),
-)
-
 body_about_this_app <- fluidRow(
     box(title = "About ProcessMiner",
         status = "primary",
@@ -98,7 +88,7 @@ body <- dashboardBody(
         $("#process_flow_1-process").height(boxHeight - 30);
         
         $("#timeline_box").height(boxHeight);
-        $("#plotlydottedchart").height(boxHeight - 30);
+        $("#events_timeline_1-plotlydottedchart").height(boxHeight - 30);
       };
 
       // Set input$box_height when the connection is established
@@ -117,7 +107,7 @@ body <- dashboardBody(
         tabItem(tabName = "table_view", body_table_view),
         eventlogSummaryUI(id = "summary_stats_1"),
         processFlowUI(id = "process_flow_1"),
-        tabItem(tabName = "timeline_view", body_timeline_view),
+        eventsTimelineUI(id = "events_timeline_1"),
         tabItem(tabName = "about_this_app", body_about_this_app)
     )
 )
