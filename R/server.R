@@ -260,16 +260,6 @@ server <- function(session, input, output) {
     })
     
     
-    # Activity details not shown at the moment
-    # output$activity_selection <- renderText({
-    #   
-    #   req(input$process_activities)
-    #   
-    #   paste0(input$process_activities, ",")
-    #   
-    # })
-    
-    
     output$process <- renderProcessanimater(expr = {
         
         req(eventlog())

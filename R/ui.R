@@ -75,13 +75,7 @@ body_process_flow <- fluidRow(
                solidHeader = TRUE,
                width = 12,
                dataTableOutput("process_flow_selected_case")
-           )#,
-           # box(title = "Selected activities",
-           #     status = "primary",
-           #     solidHeader = TRUE,
-           #     width = 12,
-           #     textOutput("activity_selection")
-           # )
+           )
     ),
     column(width = 3,
            uiOutput("process_flow_settings_box")
