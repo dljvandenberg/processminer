@@ -51,15 +51,6 @@ eventlogSummaryUI <- function(id){
 eventlogSummary <- function(input, output, session, myeventlog, default_color = "skyblue2"){
   ns <- session$ns
   
-  ###################################
-  # Reactive values
-  ###################################
-  
-  
-  
-  ###################################
-  # Output UI
-  ###################################
   
   output$stats_cases <- plotly::renderPlotly({
     
