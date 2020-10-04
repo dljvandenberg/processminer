@@ -1,6 +1,5 @@
 # Shiny Module for visualizing process flow from eventlog
 
-# TODO: remove obsolete imports
 library(dplyr)
 library(tidyr)
 library(lubridate)
@@ -12,13 +11,14 @@ library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
-library(shinyhelper)
 library(plotly)
 library(RColorBrewer)
 
 
 
-# Process Flow tab UI code
+##############################
+## Process Flow tab UI code ##
+##############################
 processFlowUI <- function(id){
   ns <- NS(id)
 
@@ -50,7 +50,10 @@ processFlowUI <- function(id){
 }
 
 
-# Process Flow tab server code
+
+##################################
+## Process Flow tab server code ##
+##################################
 processFlow <- function(input, output, session, eventlog){
   ns <- session$ns
   
@@ -186,12 +189,3 @@ processFlow <- function(input, output, session, eventlog){
   menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram"))
   
 }
-
-
-## To be copied in the UI
-# processFlowUI(id = "process_flow_1")
-
-
-## To be copied in the server
-# callModule(processFlow, "process_flow_1", eventlog = reactive(eventlog))
-

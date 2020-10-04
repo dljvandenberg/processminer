@@ -11,7 +11,9 @@ library(plotly)
 
 
 
-# Eventlog summary tab UI code
+##################################
+## Eventlog summary tab UI code ##
+##################################
 eventlogSummaryUI <- function(id){
   ns <- NS(id)
 
@@ -47,7 +49,10 @@ eventlogSummaryUI <- function(id){
 }
 
 
-# Eventlog summary tab server code
+
+######################################
+## Eventlog summary tab server code ##
+######################################
 eventlogSummary <- function(input, output, session, myeventlog, default_color = "skyblue2"){
   ns <- session$ns
   
@@ -110,12 +115,3 @@ eventlogSummary <- function(input, output, session, myeventlog, default_color = 
   menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar"))
   
 }
-
-
-## To be copied in the UI
-# eventlogSummaryUI(id = "summary_stats_1")
-
-
-## To be copied in the server
-# callModule(eventlogSummary, "summary_stats_1", myeventlog = reactive(eventlog))
-
