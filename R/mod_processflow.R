@@ -31,7 +31,7 @@ processFlowUI <- function(id){
                solidHeader = TRUE,
                width = 12,
                closable = FALSE,
-               shinycssloaders::withSpinner(processanimaterOutput(ns("process")))
+               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 700))
            ),
            box(title = "Selected case",
                status = "primary",

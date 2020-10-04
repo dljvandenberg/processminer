@@ -95,7 +95,7 @@ body <- dashboardBody(
         var boxHeight = window_height - header_height - 100;
 
         $("#process_box").height(boxHeight);
-        $("#process").height(boxHeight - 30);
+        $("#process_flow_1-process").height(boxHeight - 30);
         
         $("#timeline_box").height(boxHeight);
         $("#plotlydottedchart").height(boxHeight - 30);
