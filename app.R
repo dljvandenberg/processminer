@@ -1,3 +1,4 @@
+source('R/mod_eventlogsummary.R')
 source('R/ui.R')
 source('R/server.R')
 

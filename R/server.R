@@ -1,5 +1,6 @@
 # Server logic of ProcessMiner Shiny web application
 
+# TODO: remove obsolete imports
 library(dplyr)
 library(tidyr)
 library(lubridate)
@@ -41,8 +42,6 @@ server <- function(session, input, output) {
     
     options(shiny.maxRequestSize=30*1024^2)
     
-    default_color <- 'skyblue2'
-    
     eventlog <- reactiveVal()
     
     
@@ -83,7 +82,7 @@ server <- function(session, input, output) {
             sidebarMenu(
                 menuitem_dataload,
                 menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-                menuItem(text = "Summary statistics", tabName = "summary_statistics", icon = icon("chart-bar")),
+                callModule(eventlogSummary, "summary_stats_1", myeventlog = reactive(eventlog())),
                 menuItem(text = "Process flow", tabName = "process_flow", icon = icon("project-diagram")),
                 menuItem(text = "Timeline view", tabName = "timeline_view", icon = icon("clock")),
                 menuitem_about
@@ -211,62 +210,6 @@ server <- function(session, input, output) {
             select(-any_of(irrelevant_cols))
         
     })
-    
-    
-    output$stats_cases <- plotly::renderPlotly({
-        
-        req(eventlog())
-        
-        activity_var <- sym(bupaR::activity_id(eventlog()))
-        eventlog() %>% 
-            bupaR::group_by_activity() %>% 
-            bupaR::n_cases() %>% 
-            {ggplot(., aes(x = !!activity_var, y = n_cases)) +
-                    geom_col(fill = default_color) +
-                    ylab('Number of cases') +
-                    coord_flip()} %>% 
-            ggplotly()
-    })
-    
-    
-    output$stats_events <- plotly::renderPlotly({
-        
-        req(eventlog())
-        
-        activity_var <- sym(bupaR::activity_id(eventlog()))
-        eventlog() %>% 
-            bupaR::group_by_activity() %>% 
-            bupaR::n_events() %>% 
-            {ggplot(., aes(x = !!activity_var, y = n_events)) +
-                    geom_col(fill = default_color) +
-                    ylab('Number of events') +
-                    coord_flip()} %>% 
-            ggplotly()
-    })
-    
-    
-    output$throughput_time_plot <- renderPlot({
-        
-        req(eventlog())
-        
-        eventlog() %>% 
-            edeaR::throughput_time(level = "case") %>% 
-            plot()
-        
-    })
-    
-    
-    output$stats_table <- shiny::renderTable({
-        
-        req(eventlog())
-        
-        n_cases <- bupaR::n_cases(eventlog())
-        n_events <- bupaR::n_events(eventlog())
-        n_activities <- bupaR::n_activities(eventlog())
-        
-        data.frame(Statistic = c('Number of activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
-    })
-    
     
     
     output$process_flow_settings_box <- renderUI({

@@ -1,7 +1,6 @@
 # User-interface definition of ProcessMiner Shiny web application
-library(shiny)
 
-
+# TODO: remove obsolete imports
 library(dplyr)
 library(tidyr)
 library(lubridate)
@@ -60,34 +59,6 @@ body_table_view <- fluidRow(
         shinycssloaders::withSpinner(dataTableOutput("datatable"))
     )
 )  
-
-body_summary_statistics <- fluidRow(
-    
-    box(title = "Cases per activity",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        shinycssloaders::withSpinner(plotlyOutput("stats_cases"))
-    ),
-    box(title = "Events per activity",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        shinycssloaders::withSpinner(plotlyOutput("stats_events"))
-    ),
-    box(title = "Throughput times per case",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        shinycssloaders::withSpinner(plotOutput("throughput_time_plot"))
-    ),
-    box(title = "Summary stats",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 6,
-        shinycssloaders::withSpinner(tableOutput("stats_table"))
-    )
-)
 
 body_process_flow <- fluidRow(
     column(width = 9,
@@ -172,7 +143,7 @@ body <- dashboardBody(
         tabItem(tabName = "data_upload", body_data_upload),
         tabItem(tabName = "example_dataset", body_example_dataset),
         tabItem(tabName = "table_view", body_table_view),
-        tabItem(tabName = "summary_statistics", body_summary_statistics),
+        eventlogSummaryUI(id = "summary_stats_1"),
         tabItem(tabName = "process_flow", body_process_flow),
         tabItem(tabName = "timeline_view", body_timeline_view),
         tabItem(tabName = "about_this_app", body_about_this_app)
