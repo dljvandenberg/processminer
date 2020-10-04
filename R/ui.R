@@ -2,80 +2,15 @@
 
 # TODO: remove obsolete imports
 library(dplyr)
-library(tidyr)
-library(lubridate)
-library(bupaR)
-library(eventdataR)
-library(edeaR)
-library(processmapR)
-library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
-library(shinyhelper)
-library(plotly)
-library(RColorBrewer)
 
 
-### UI code ###
 
-## Header
-header <- dashboardHeader(title = "ProcessMiner")
+## JavaScript code
 
-
-## Sidebar items
-sidebar <- dashboardSidebar(
-    sidebarMenuOutput("sidebarmenu")
-)
-
-
-## Components for dashboard body
-
-body_data_upload <- fluidRow(
-    box(title = "File upload",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
-    ),
-    uiOutput(outputId = "data_sample_box"),
-    uiOutput(outputId = "variable_selection_box")
-)
-
-body_example_dataset <- fluidRow(
-    box(title = "Example dataset",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        uiOutput("example_dataset_selector")
-    )
-)
-
-body_table_view <- fluidRow(
-    box(title = "Raw data",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        shinycssloaders::withSpinner(dataTableOutput("datatable"))
-    )
-)  
-
-body_about_this_app <- fluidRow(
-    box(title = "About ProcessMiner",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
-        p("It was created by Dennis van den Berg and uses the bupaR process mining library in R, with a UI built in R Shiny."),
-        p("Its current status is: experimental"),
-        p("Source code: ", a(href="https://github.com/dljvandenberg/processminer", "https://github.com/dljvandenberg/processminer"))
-    )
-)
-
-
-## Dashboard body
-body <- dashboardBody(
-    tags$head(tags$script('
+javascript_head <- tags$head(tags$script('
       // Define function to set height of "process_box", "process", "timeline_box" and "plotlydottedchart"
       // See https://stackoverflow.com/questions/56965843/height-of-the-box-in-r-shiny
       setHeight = function() {
@@ -100,8 +35,63 @@ body <- dashboardBody(
       $(window).on("resize", function(){
         setHeight();
       });
-    ')),
-    tabItems(
+    '))
+
+
+## Components for dashboard body
+
+body_data_upload <- fluidRow(
+  box(title = "File upload",
+      status = "primary",
+      solidHeader = TRUE,
+      width = 12,
+      fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
+  ),
+  uiOutput(outputId = "data_sample_box"),
+  uiOutput(outputId = "variable_selection_box")
+)
+
+body_example_dataset <- fluidRow(
+  box(title = "Example dataset",
+      status = "primary",
+      solidHeader = TRUE,
+      width = 12,
+      uiOutput("example_dataset_selector")
+  )
+)
+
+body_table_view <- fluidRow(
+  box(title = "Raw data",
+      status = "primary",
+      solidHeader = TRUE,
+      width = 12,
+      shinycssloaders::withSpinner(dataTableOutput("datatable"))
+  )
+)  
+
+body_about_this_app <- fluidRow(
+  box(title = "About ProcessMiner",
+      status = "primary",
+      solidHeader = TRUE,
+      width = 12,
+      p("ProcessMiner is a simple web-based process mining tool for exploration (and potentially prediction)."),
+      p("It was created by Dennis van den Berg and uses the bupaR process mining library in R, with a UI built in R Shiny."),
+      p("Its current status is: experimental"),
+      p("Source code: ", a(href="https://github.com/dljvandenberg/processminer", "https://github.com/dljvandenberg/processminer"))
+  )
+)
+
+
+
+## Bringing everything together in ui
+ui <- function(request) {
+  dashboardPage(
+    dashboardHeader(title = "ProcessMiner"),
+    dashboardSidebar(sidebarMenuOutput("sidebarmenu")),
+    dashboardBody(
+      javascript_head,
+      tabItems(
+        # Available dashboard body content
         tabItem(tabName = "data_upload", body_data_upload),
         tabItem(tabName = "example_dataset", body_example_dataset),
         tabItem(tabName = "table_view", body_table_view),
@@ -109,14 +99,7 @@ body <- dashboardBody(
         processFlowUI(id = "process_flow_1"),
         eventsTimelineUI(id = "events_timeline_1"),
         tabItem(tabName = "about_this_app", body_about_this_app)
+      )
     )
-)
-
-
-ui <- function(request) {
-    dashboardPage(
-        header,
-        sidebar,
-        body
-    )
+  )
 }
