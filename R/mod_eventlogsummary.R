@@ -1,32 +1,17 @@
 # Shiny Module for eventlog summary
 
-# TODO: remove obsolete imports
 library(dplyr)
 library(tidyr)
-library(lubridate)
 library(bupaR)
-library(eventdataR)
 library(edeaR)
-library(processmapR)
-library(processanimateR)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
-library(shinyhelper)
 library(plotly)
-library(RColorBrewer)
 
 
-#' eventlogSummary UI Function
-#'
-#' @description Eventlog summary tab UI code
-#'
-#' @param id,input,output,session Internal parameters for {shiny}.
-#'
-#' @noRd 
-#'
-#' @importFrom shiny NS 
-#' @importFrom shinydashoard tabItem 
+
+# Eventlog summary tab UI code
 eventlogSummaryUI <- function(id){
   ns <- NS(id)
 
@@ -62,9 +47,7 @@ eventlogSummaryUI <- function(id){
 }
 
 
-#' Eventlog summary tab server code
-#'
-#' @noRd 
+# Eventlog summary tab server code
 eventlogSummary <- function(input, output, session, myeventlog, default_color = "skyblue2"){
   ns <- session$ns
   
