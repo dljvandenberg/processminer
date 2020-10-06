@@ -14,7 +14,7 @@ library(plotly)
 ##################################
 ## Eventlog summary tab UI code ##
 ##################################
-eventlogSummaryUI <- function(id){
+eventlogSummaryTabUI <- function(id){
   ns <- NS(id)
 
   body_summary_statistics <- fluidRow(
@@ -53,7 +53,7 @@ eventlogSummaryUI <- function(id){
 ######################################
 ## Eventlog summary tab server code ##
 ######################################
-eventlogSummary <- function(input, output, session, myeventlog, default_color = "skyblue2"){
+eventlogSummaryTab <- function(input, output, session, myeventlog, default_color = "skyblue2"){
   ns <- session$ns
   
   

@@ -18,16 +18,22 @@ library(RColorBrewer)
 
 
 
-### Server logic
-
 server <- function(session, input, output) {
     
+    ###########################
+    ## Global server options ##
+    ###########################
+    
+    # Set maxRequestSize for data upload of larger files
     options(shiny.maxRequestSize=30*1024^2)
     
-    eventlog <- reactiveVal()
     
+    #####################
+    ## Reactive values ##
+    #####################
     
-    data <- reactive({
+    # Raw data from data upload
+    rawdata <- reactive({
         
         req(input$eventlogFile)
         
@@ -46,6 +52,14 @@ server <- function(session, input, output) {
         
     })
     
+
+    # Eventlog, either from processed rawdata() or from loading example evenlog
+    eventlog <- reactiveVal()
+
+        
+    ########################
+    ## Render UI contents ##
+    ########################
     
     output$sidebarmenu <- renderMenu({
         
@@ -64,9 +78,9 @@ server <- function(session, input, output) {
             sidebarMenu(
                 menuitem_dataload,
                 menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
-                callModule(eventlogSummary, "summary_stats_1", myeventlog = reactive(eventlog())),
-                callModule(processFlow, "process_flow_1", eventlog = reactive(eventlog())),
-                callModule(eventsTimeline, "events_timeline_1", eventlog = reactive(eventlog())),
+                callModule(eventlogSummaryTab, "summary_stats", myeventlog = reactive(eventlog())),
+                callModule(processFlowTab, "process_flow", eventlog = reactive(eventlog())),
+                callModule(eventsTimelineTab, "events_timeline", eventlog = reactive(eventlog())),
                 menuitem_about
             )    
             
@@ -84,10 +98,10 @@ server <- function(session, input, output) {
     
     output$data_sample_box <- renderUI({
         
-        req(data())
+        req(rawrawdata())
         
         output$datatable_head <- renderDataTable({
-            data() %>% 
+            rawrawdata() %>% 
                 head(3)
         })
         
@@ -103,9 +117,9 @@ server <- function(session, input, output) {
     
     output$variable_selection_box <- renderUI({
         
-        req(data())
+        req(rawdata())
         
-        available_variables <- c("", colnames(data()))
+        available_variables <- c("", colnames(rawdata()))
         
         box(title = "Select column names",
             status = "primary",
@@ -121,7 +135,6 @@ server <- function(session, input, output) {
     })
     
     
-    
     output$example_dataset_selector <- renderUI({
         
         # Datasets available via eventdataR package
@@ -134,16 +147,34 @@ server <- function(session, input, output) {
     })
     
     
-    # On button click 
+    output$datatable <- renderDataTable({
+        
+        req(eventlog())
+        
+        # Don't show eventlog columns that are irrelevant to user
+        irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
+        eventlog() %>%
+            as.data.frame() %>% 
+            select(-any_of(irrelevant_cols))
+        
+    })
+    
+    
+    
+    #####################
+    ## Event observers ##
+    #####################
+    
+    # On button click, generate eventlog from data upload
     observeEvent(input$generate_eventlog_from_upload_button,{
         
-        req(data())
-        req(input$case_id_var %in% colnames(data()))
-        req(input$timestamp_var %in% colnames(data()))
-        req(input$activity_var %in% colnames(data()))
+        req(rawdata())
+        req(input$case_id_var %in% colnames(rawdata()))
+        req(input$timestamp_var %in% colnames(rawdata()))
+        req(input$activity_var %in% colnames(rawdata()))
         
         # Create eventlog from data and save to 'eventlog' reactive value
-        data() %>%
+        rawdata() %>%
             simple_eventlog(
                 case_id = input$case_id_var,
                 activity_id = input$activity_var,
@@ -161,7 +192,7 @@ server <- function(session, input, output) {
     })
     
     
-    # On button click 
+    # On button click, load selected example eventlog
     observeEvent(input$load_example_eventlog_button,{
         
         req(input$selected_example_dataset)
@@ -179,18 +210,5 @@ server <- function(session, input, output) {
         }
         
     })
-    
-    
-    output$datatable <- renderDataTable({
-        
-        req(eventlog())
-        
-        # Don't show eventlog columns that are irrelevant to user
-        irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
-        eventlog() %>%
-            as.data.frame() %>% 
-            select(-any_of(irrelevant_cols))
-        
-    })
-    
+
 }

@@ -14,7 +14,7 @@ library(plotly)
 #################################
 ## Events Timeline tab UI code ##
 #################################
-eventsTimelineUI <- function(id){
+eventsTimelineTabUI <- function(id){
   ns <- NS(id)
 
   # Events Timeline body contents
@@ -37,7 +37,7 @@ eventsTimelineUI <- function(id){
 #####################################
 ## Events Timeline tab server code ##
 #####################################
-eventsTimeline <- function(input, output, session, eventlog){
+eventsTimelineTab <- function(input, output, session, eventlog){
   ns <- session$ns
   
   # Events Timeline diagram

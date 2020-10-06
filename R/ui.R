@@ -1,14 +1,14 @@
 # User-interface definition of ProcessMiner Shiny web application
 
-# TODO: remove obsolete imports
 library(dplyr)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
 
 
-
-## JavaScript code
+#####################
+## JavaScript code ##
+#####################
 
 javascript_head <- tags$head(tags$script('
       // Define function to set height of "process_box", "process", "timeline_box" and "plotlydottedchart"
@@ -20,10 +20,10 @@ javascript_head <- tags$head(tags$script('
         var boxHeight = window_height - header_height - 100;
 
         $("#process_box").height(boxHeight);
-        $("#process_flow_1-process").height(boxHeight - 30);
+        $("#process_flow-process").height(boxHeight - 30);
         
         $("#timeline_box").height(boxHeight);
-        $("#events_timeline_1-plotlydottedchart").height(boxHeight - 30);
+        $("#events_timeline-plotlydottedchart").height(boxHeight - 30);
       };
 
       // Set input$box_height when the connection is established
@@ -38,7 +38,9 @@ javascript_head <- tags$head(tags$script('
     '))
 
 
-## Components for dashboard body
+###################################
+## Components for dashboard body ##
+###################################
 
 body_data_upload <- fluidRow(
   box(title = "File upload",
@@ -82,8 +84,10 @@ body_about_this_app <- fluidRow(
 )
 
 
+#######################################
+## Bring the above UI parts together ##
+#######################################
 
-## Bringing everything together in ui
 ui <- function(request) {
   dashboardPage(
     dashboardHeader(title = "ProcessMiner"),
@@ -95,9 +99,9 @@ ui <- function(request) {
         tabItem(tabName = "data_upload", body_data_upload),
         tabItem(tabName = "example_dataset", body_example_dataset),
         tabItem(tabName = "table_view", body_table_view),
-        eventlogSummaryUI(id = "summary_stats_1"),
-        processFlowUI(id = "process_flow_1"),
-        eventsTimelineUI(id = "events_timeline_1"),
+        eventlogSummaryTabUI(id = "summary_stats"),
+        processFlowTabUI(id = "process_flow"),
+        eventsTimelineTabUI(id = "events_timeline"),
         tabItem(tabName = "about_this_app", body_about_this_app)
       )
     )

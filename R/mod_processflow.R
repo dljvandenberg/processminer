@@ -19,7 +19,7 @@ library(RColorBrewer)
 ##############################
 ## Process Flow tab UI code ##
 ##############################
-processFlowUI <- function(id){
+processFlowTabUI <- function(id){
   ns <- NS(id)
 
   # Process flow body contents
@@ -54,7 +54,7 @@ processFlowUI <- function(id){
 ##################################
 ## Process Flow tab server code ##
 ##################################
-processFlow <- function(input, output, session, eventlog){
+processFlowTab <- function(input, output, session, eventlog){
   ns <- session$ns
   
 
