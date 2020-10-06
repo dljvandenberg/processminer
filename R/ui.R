@@ -63,7 +63,7 @@ body_example_dataset <- fluidRow(
 )
 
 body_table_view <- fluidRow(
-  box(title = "Raw data",
+  box(title = "Raw eventlog data",
       status = "primary",
       solidHeader = TRUE,
       width = 12,

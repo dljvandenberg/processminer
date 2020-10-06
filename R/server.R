@@ -98,10 +98,10 @@ server <- function(session, input, output) {
     
     output$data_sample_box <- renderUI({
         
-        req(rawrawdata())
+        req(rawdata())
         
         output$datatable_head <- renderDataTable({
-            rawrawdata() %>% 
+            rawdata() %>% 
                 head(3)
         })
         
