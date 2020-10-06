@@ -62,15 +62,6 @@ body_example_dataset <- fluidRow(
   )
 )
 
-body_table_view <- fluidRow(
-  box(title = "Raw eventlog data",
-      status = "primary",
-      solidHeader = TRUE,
-      width = 12,
-      shinycssloaders::withSpinner(dataTableOutput("datatable"))
-  )
-)  
-
 body_about_this_app <- fluidRow(
   box(title = "About ProcessMiner",
       status = "primary",
@@ -98,7 +89,7 @@ ui <- function(request) {
         # Available dashboard body content
         tabItem(tabName = "data_upload", body_data_upload),
         tabItem(tabName = "example_dataset", body_example_dataset),
-        tabItem(tabName = "table_view", body_table_view),
+        tableViewTabUI(id = "table_view"),
         eventlogSummaryTabUI(id = "summary_stats"),
         processFlowTabUI(id = "process_flow"),
         eventsTimelineTabUI(id = "events_timeline"),

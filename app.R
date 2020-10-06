@@ -1,4 +1,5 @@
 source('R/utils.R')
+source('R/mod_table_view.R')
 source('R/mod_eventlog_summary.R')
 source('R/mod_process_flow.R')
 source('R/mod_eventlog_timeline.R')

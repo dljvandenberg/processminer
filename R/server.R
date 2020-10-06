@@ -77,7 +77,7 @@ server <- function(session, input, output) {
             # Show extended menu when data has been loaded
             sidebarMenu(
                 menuitem_dataload,
-                menuItem(text = "Table view", tabName = "table_view", icon = icon("table")),
+                callModule(tableViewTab, "table_view", eventlog = reactive(eventlog())),
                 callModule(eventlogSummaryTab, "summary_stats", myeventlog = reactive(eventlog())),
                 callModule(processFlowTab, "process_flow", eventlog = reactive(eventlog())),
                 callModule(eventsTimelineTab, "events_timeline", eventlog = reactive(eventlog())),
@@ -144,19 +144,6 @@ server <- function(session, input, output) {
                selectInput(inputId = "selected_example_dataset", label = "Choose example eventlog", choices = c("", available_datasets), selected = "patients"),
                actionButton(inputId = "load_example_eventlog_button", label = "Load eventlog")
         )
-    })
-    
-    
-    output$datatable <- renderDataTable({
-        
-        req(eventlog())
-        
-        # Don't show eventlog columns that are irrelevant to user
-        irrelevant_cols <- c("activity_instance_id", "lifecycle_id", "resource_id", ".order")
-        eventlog() %>%
-            as.data.frame() %>% 
-            select(-any_of(irrelevant_cols))
-        
     })
     
     
