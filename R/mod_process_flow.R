@@ -83,8 +83,7 @@ processFlowTab <- function(input, output, session, eventlog){
         selectInput(inputId = ns("colorAttribute"), label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
         selectInput(inputId = ns("sizeAttribute"), label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
         #dateRangeInput(inputId = ns("dateRange"), label = "Date range", min = timestamp_min, max = timestamp_max),
-        #sliderInput(inputId = ns("timeRange"), label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
-        #sliderInput(inputId = ns("minTraceFrequency"), label = "Remove paths occurring less than .. times", min = 1, max = 100, step = 1, value = 1)
+        sliderInput(inputId = ns("timeRange"), label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
         sliderInput(inputId = ns("minTraceFrequency"), label = "Remove paths with frequency below", min = 1, max = 100, step = 1, value = 1)
     )
     
@@ -113,6 +112,7 @@ processFlowTab <- function(input, output, session, eventlog){
   output$process <- renderProcessanimater(expr = {
     
     req(eventlog())
+    req(input$timeRange)
     req(input$minTraceFrequency)
     req(input$mapType)
     req(input$sizeAttribute)
@@ -121,6 +121,7 @@ processFlowTab <- function(input, output, session, eventlog){
     
     # Filter base eventlog
     plotdata <- eventlog() %>% 
+      edeaR::filter_time_period(input$timeRange) %>% 
       edeaR::filter_trace_frequency(interval = c(input$minTraceFrequency, NA))
     
     # Default process map settings
