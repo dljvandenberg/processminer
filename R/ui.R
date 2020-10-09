@@ -42,26 +42,6 @@ javascript_head <- tags$head(tags$script('
 ## Components for dashboard body ##
 ###################################
 
-body_data_upload <- fluidRow(
-  box(title = "File upload",
-      status = "primary",
-      solidHeader = TRUE,
-      width = 12,
-      fileInput(inputId = "eventlogFile", label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
-  ),
-  uiOutput(outputId = "data_sample_box"),
-  uiOutput(outputId = "variable_selection_box")
-)
-
-body_example_dataset <- fluidRow(
-  box(title = "Example dataset",
-      status = "primary",
-      solidHeader = TRUE,
-      width = 12,
-      uiOutput("example_dataset_selector")
-  )
-)
-
 body_about_this_app <- fluidRow(
   box(title = "About ProcessMiner",
       status = "primary",
@@ -87,8 +67,8 @@ ui <- function(request) {
       javascript_head,
       tabItems(
         # Available dashboard body content
-        tabItem(tabName = "data_upload", body_data_upload),
-        tabItem(tabName = "example_dataset", body_example_dataset),
+        loadEventLogTabUI(id = "data_upload", type = "data_upload"),
+        loadEventLogTabUI(id = "example_dataset", type = "example_dataset"),
         tableViewTabUI(id = "table_view"),
         eventlogSummaryTabUI(id = "summary_stats"),
         processFlowTabUI(id = "process_flow"),

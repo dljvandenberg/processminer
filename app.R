@@ -1,4 +1,4 @@
-source('R/utils.R')
+source('R/mod_load_eventlog.R')
 source('R/mod_table_view.R')
 source('R/mod_eventlog_summary.R')
 source('R/mod_process_flow.R')
