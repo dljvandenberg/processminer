@@ -22,4 +22,3 @@ RUN R -e "install.packages('RColorBrewer', repos='http://cran.rstudio.com/')"
 COPY processminer.Rproj /srv/shiny-server/
 COPY app.R /srv/shiny-server/app.R
 COPY R /srv/shiny-server/R
-COPY data /srv/shiny-server/data
