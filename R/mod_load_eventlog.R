@@ -87,7 +87,7 @@ loadEventLogTabUI <- function(id, type = 'data_upload'){
 ###################################
 ## Load Eventlog tab server code ##
 ###################################
-loadEventLogTab <- function(input, output, session, myeventlog, type = 'data_upload', selected = FALSE){
+loadEventLogTab <- function(input, output, session, myreactivevalues, type = 'data_upload', selected = FALSE){
   ns <- session$ns
   
   #####################
@@ -184,21 +184,17 @@ loadEventLogTab <- function(input, output, session, myeventlog, type = 'data_upl
     req(input$timestamp_var %in% colnames(rawdata()))
     req(input$activity_var %in% colnames(rawdata()))
     
-    # Create eventlog from data and save to 'myeventlog' reactive value
-    rawdata() %>%
+    # Create eventlog from data
+    myreactivevalues$eventlog <- rawdata() %>%
       simple_eventlog(
         case_id = input$case_id_var,
         activity_id = input$activity_var,
         timestamp = input$timestamp_var
       ) %>% 
-      myeventlog()
-    
-    # Add time_since_start column to eventlog and set reactive value
-    myeventlog() %>% 
-      add_time_since_case_start() %>% 
-      myeventlog()
-    
-    print(paste0("INFO: eventlog generated from data upload (containing ", nrow(myeventlog()), " lines)"))
+      # Add time_since_start column to eventlog
+      add_time_since_case_start()
+
+    print(paste0("INFO: eventlog generated from data upload (containing ", nrow(myreactivevalues$eventlog), " lines)"))
     
   })
   
@@ -212,17 +208,12 @@ loadEventLogTab <- function(input, output, session, myeventlog, type = 'data_upl
     
     if(input$selected_example_dataset != ""){
       
-      # TODO_CURRENT: troubleshoot, find out how to pass myeventlog reactiveVal to server part of module
-      
       # Set eventlog reactive value
-      myeventlog(get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE))
+      myreactivevalues$eventlog <- get(input$selected_example_dataset, "package:eventdataR", inherits = FALSE) %>% 
+        # Add time_since_start column to eventlog
+        add_time_since_case_start()
       
-      # Add time_since_start column to eventlog and set reactive value
-      myeventlog() %>% 
-        add_time_since_case_start() %>% 
-        myeventlog()
-      
-      print(paste0("INFO: '", input$selected_example_dataset, "' eventlog loaded from package eventdataR (containing ", nrow(myeventlog()), " lines)"))
+      print(paste0("INFO: '", input$selected_example_dataset, "' eventlog loaded from package eventdataR (containing ", nrow(myreactivevalues$eventlog), " lines)"))
     }
     
   })

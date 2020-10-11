@@ -25,7 +25,7 @@ server <- function(session, input, output) {
     #####################
     
     # Eventlog, either from processed rawdata() or from loading example evenlog
-    eventlog <- reactiveVal()
+    reactivevalues <- reactiveValues(eventlog = NULL)
 
     
     ########################
@@ -35,12 +35,12 @@ server <- function(session, input, output) {
     output$sidebarmenu <- renderMenu({
         
         # NULL eventlog corresponds to to data loaded. In case of no data loaded, show less menu items
-        data_loaded <- !is.null(eventlog())
+        data_loaded <- !is.null(reactivevalues$eventlog)
         
         # Define these menuitems once, in order to use them in the conditional part below
         menuitem_dataload <- menuItem(text = "Load data", icon = icon("database"), startExpanded = TRUE,
-                                      callModule(loadEventLogTab, "example_dataset", myeventlog = reactive(eventlog()), type = "example_dataset", selected = TRUE),
-                                      callModule(loadEventLogTab, "data_upload", myeventlog = reactive(eventlog()), type = "data_upload")
+                                      callModule(loadEventLogTab, "example_dataset", myreactivevalues = reactivevalues, type = "example_dataset", selected = TRUE),
+                                      callModule(loadEventLogTab, "data_upload", myreactivevalues = reactivevalues, type = "data_upload")
         )
         menuitem_about <- menuItem(text = "About ProcessMiner", tabName = "about_this_app", icon = icon("info-circle"))
         
@@ -48,10 +48,10 @@ server <- function(session, input, output) {
             # Show extended menu when data has been loaded
             sidebarMenu(
                 menuitem_dataload,
-                callModule(tableViewTab, "table_view", eventlog = reactive(eventlog())),
-                callModule(eventlogSummaryTab, "summary_stats", myeventlog = reactive(eventlog())),
-                callModule(processFlowTab, "process_flow", eventlog = reactive(eventlog())),
-                callModule(eventsTimelineTab, "events_timeline", eventlog = reactive(eventlog())),
+                callModule(tableViewTab, "table_view", eventlog = reactive(reactivevalues$eventlog)),
+                callModule(eventlogSummaryTab, "summary_stats", myeventlog = reactive(reactivevalues$eventlog)),
+                callModule(processFlowTab, "process_flow", eventlog = reactive(reactivevalues$eventlog)),
+                callModule(eventsTimelineTab, "events_timeline", eventlog = reactive(reactivevalues$eventlog)),
                 menuitem_about
             )    
             
