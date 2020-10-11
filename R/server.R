@@ -49,7 +49,7 @@ server <- function(session, input, output) {
             sidebarMenu(
                 menuitem_dataload,
                 callModule(tableViewTab, "table_view", eventlog = reactive(reactivevalues$eventlog)),
-                callModule(eventlogSummaryTab, "summary_stats", myeventlog = reactive(reactivevalues$eventlog)),
+                callModule(eventlogSummaryTab, "summary_stats", eventlog = reactive(reactivevalues$eventlog)),
                 callModule(processFlowTab, "process_flow", eventlog = reactive(reactivevalues$eventlog)),
                 callModule(eventsTimelineTab, "events_timeline", eventlog = reactive(reactivevalues$eventlog)),
                 menuitem_about

@@ -53,16 +53,16 @@ eventlogSummaryTabUI <- function(id){
 ######################################
 ## Eventlog summary tab server code ##
 ######################################
-eventlogSummaryTab <- function(input, output, session, myeventlog, default_color = "skyblue2"){
+eventlogSummaryTab <- function(input, output, session, eventlog, default_color = "skyblue2"){
   ns <- session$ns
   
   
   output$stats_cases <- plotly::renderPlotly({
     
-    req(myeventlog())
+    req(eventlog())
     
-    activity_var <- sym(bupaR::activity_id(myeventlog()))
-    myeventlog() %>% 
+    activity_var <- sym(bupaR::activity_id(eventlog()))
+    eventlog() %>% 
       bupaR::group_by_activity() %>% 
       bupaR::n_cases() %>% 
       {ggplot(., aes(x = !!activity_var, y = n_cases)) +
@@ -75,10 +75,10 @@ eventlogSummaryTab <- function(input, output, session, myeventlog, default_color
   
   output$stats_events <- plotly::renderPlotly({
     
-    req(myeventlog())
+    req(eventlog())
     
-    activity_var <- sym(bupaR::activity_id(myeventlog()))
-    myeventlog() %>% 
+    activity_var <- sym(bupaR::activity_id(eventlog()))
+    eventlog() %>% 
       bupaR::group_by_activity() %>% 
       bupaR::n_events() %>% 
       {ggplot(., aes(x = !!activity_var, y = n_events)) +
@@ -91,9 +91,9 @@ eventlogSummaryTab <- function(input, output, session, myeventlog, default_color
   
   output$throughput_time_plot <- renderPlot({
     
-    req(myeventlog())
+    req(eventlog())
     
-    myeventlog() %>% 
+    eventlog() %>% 
       edeaR::throughput_time(level = "case") %>% 
       plot()
     
@@ -102,11 +102,11 @@ eventlogSummaryTab <- function(input, output, session, myeventlog, default_color
   
   output$stats_table <- shiny::renderTable({
     
-    req(myeventlog())
+    req(eventlog())
     
-    n_cases <- bupaR::n_cases(myeventlog())
-    n_events <- bupaR::n_events(myeventlog())
-    n_activities <- bupaR::n_activities(myeventlog())
+    n_cases <- bupaR::n_cases(eventlog())
+    n_events <- bupaR::n_events(eventlog())
+    n_activities <- bupaR::n_activities(eventlog())
     
     data.frame(Statistic = c('Number of activities', 'Number of cases', 'Number of events'), Value = c(n_activities, n_cases, n_events))
   })
