@@ -36,8 +36,8 @@ processFlowTabUI <- function(id){
                solidHeader = TRUE,
                width = 12,
                closable = FALSE,
-               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 500) %>% 
-                                              shinyhelper::helper(type = "inline", title = "Process flow", content = process_flow_diagram_help_text, size = 'l'))
+               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 500)) %>% 
+                                              shinyhelper::helper(type = "inline", title = "Process flow", content = process_flow_diagram_help_text, size = 'l')
            ),
            box(title = "Selected case",
                status = "primary",
