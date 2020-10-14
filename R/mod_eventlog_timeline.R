@@ -31,8 +31,8 @@ eventsTimelineTabUI <- function(id){
         status = "primary",
         solidHeader = TRUE,
         width = 12,
-        shinycssloaders::withSpinner(plotlyOutput(ns("plotlydottedchart"), height = 700) %>% 
-                                       shinyhelper::helper(type = "inline", title = "Timeline view", content = timeline_view_help_text, size = 'l'))
+        shinycssloaders::withSpinner(plotlyOutput(ns("plotlydottedchart"), height = 700)) %>% 
+                                       shinyhelper::helper(type = "inline", title = "Timeline view", content = timeline_view_help_text, size = 'l')
     ),
   )
   
