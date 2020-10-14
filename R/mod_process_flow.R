@@ -21,7 +21,7 @@ library(RColorBrewer)
 ##############################
 processFlowTabUI <- function(id){
   ns <- NS(id)
-
+  
   # Process flow body contents
   body_process_flow <- fluidRow(
     column(width = 9,
@@ -57,7 +57,18 @@ processFlowTabUI <- function(id){
 processFlowTab <- function(input, output, session, eventlog){
   ns <- session$ns
   
-
+  # Helper texts
+  process_flow_settings_help_text <- "
+    <p>You can configure the following settings on the fly:
+    <li><b>Map type</b>: TODO</li>
+    <li><b>Timeline mode</b>: TODO</li>
+    <li><b>Color by</b>: TODO</li>
+    <li><b>Size by</b>: TODO</li>
+    <li><b>Time range</b>: TODO</li>
+    <li><b>Remove paths with frequency below</b>: TODO</li>
+    </p>"
+  
+  
   # Box with input settings for process flow diagram
   output$process_flow_settings_box <- renderUI({
     
@@ -78,7 +89,8 @@ processFlowTab <- function(input, output, session, eventlog){
         status = "primary",
         solidHeader = TRUE,
         width = 12,
-        selectInput(inputId = ns("mapType"), label = "Map type", choices = c("cases", "durations"), selected = "cases"),
+        selectInput(inputId = ns("mapType"), label = "Map type", choices = c("cases", "durations"), selected = "cases") %>% 
+          shinyhelper::helper(type = "inline", title = "Process flow settings", content = process_flow_settings_help_text, size = 'l'),
         selectInput(inputId = ns("timelineMode"), label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
         selectInput(inputId = ns("colorAttribute"), label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
         selectInput(inputId = ns("sizeAttribute"), label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
