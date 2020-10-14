@@ -22,6 +22,11 @@ library(RColorBrewer)
 processFlowTabUI <- function(id){
   ns <- NS(id)
   
+  # Helper texts
+  process_flow_diagram_help_text <- "
+    <p>This Process Flow diagram visualizes how cases have occurred over time. Specifically, it shows the <b>transitions between activities</b> including some statistics such as number of cases or throughput times (depending on input settings).</p>
+    <p>Each animated circle represents a single case. When clicked on, its details will show up in the area below the diagram.</p>"
+  
   # Process flow body contents
   body_process_flow <- fluidRow(
     column(width = 9,
@@ -31,7 +36,8 @@ processFlowTabUI <- function(id){
                solidHeader = TRUE,
                width = 12,
                closable = FALSE,
-               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 700))
+               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 700) %>% 
+                                              shinyhelper::helper(type = "inline", title = "Process flow", content = process_flow_diagram_help_text, size = 'l'))
            ),
            box(title = "Selected case",
                status = "primary",
@@ -60,14 +66,14 @@ processFlowTab <- function(input, output, session, eventlog){
   # Helper texts
   process_flow_settings_help_text <- "
     <p>You can configure the following settings on the fly:
-    <li><b>Map type</b>: TODO</li>
-    <li><b>Timeline mode</b>: TODO</li>
-    <li><b>Color by</b>: TODO</li>
-    <li><b>Size by</b>: TODO</li>
-    <li><b>Time range</b>: TODO</li>
-    <li><b>Remove paths with frequency below</b>: TODO</li>
+    <li><b>Map type</b>: Choose whether to display number of <i>cases</i> or average <i>durations</i> in each step of the process flow.</li>
+    <li><b>Animation mode</b>: Choose whether to animate the flow of events in <i>relative time</i> (showing their time since start) or <i>absolute time</i> (i.e. showing them in the order they happened).</li>
+    <li><b>Color variable</b>: Variable in the dataset for coloring the event tokens.</li>
+    <li><b>Size variable</b>: Variable in the dataset for sizing the event tokens.</li>
+    <li><b>Time range</b>: Only selects events within this time range.</li>
+    <li><b>Minimum path frequency</b>: Only select process flow paths that occur <i>at least this many times</i> in the dataset. Filters out rare paths that may 'pollute' the diagram.</li>
     </p>"
-  
+
   
   # Box with input settings for process flow diagram
   output$process_flow_settings_box <- renderUI({
@@ -91,12 +97,12 @@ processFlowTab <- function(input, output, session, eventlog){
         width = 12,
         selectInput(inputId = ns("mapType"), label = "Map type", choices = c("cases", "durations"), selected = "cases") %>% 
           shinyhelper::helper(type = "inline", title = "Process flow settings", content = process_flow_settings_help_text, size = 'l'),
-        selectInput(inputId = ns("timelineMode"), label = "Timeline mode", choices = c("relative", "absolute"), selected = "relative"),
-        selectInput(inputId = ns("colorAttribute"), label = "Color by", choices = c("<none>", color_attribute_choices), selected = "<none>"),
-        selectInput(inputId = ns("sizeAttribute"), label = "Size by", choices = c("<none>", size_attribute_choices), selected = "<none>"),
+        selectInput(inputId = ns("animationMode"), label = "Animation mode", choices = c("relative time", "absolute time"), selected = "relative time"),
+        selectInput(inputId = ns("colorAttribute"), label = "Color variable", choices = c("<none>", color_attribute_choices), selected = "<none>"),
+        selectInput(inputId = ns("sizeAttribute"), label = "Size variable", choices = c("<none>", size_attribute_choices), selected = "<none>"),
         #dateRangeInput(inputId = ns("dateRange"), label = "Date range", min = timestamp_min, max = timestamp_max),
         sliderInput(inputId = ns("timeRange"), label = "Time range", min = timestamp_min, max = timestamp_max, value = c(timestamp_min, timestamp_max)),
-        sliderInput(inputId = ns("minTraceFrequency"), label = "Remove paths with frequency below", min = 1, max = 100, step = 1, value = 1)
+        sliderInput(inputId = ns("minTraceFrequency"), label = "Minimum path frequency", min = 1, max = 100, step = 1, value = 1)
     )
     
   })
@@ -108,6 +114,8 @@ processFlowTab <- function(input, output, session, eventlog){
     req(eventlog())
     req(input$process_tokens)
     req(length(input$process_tokens) >= 1)
+    
+    
     
     # Filter on selected case_id, drop .order column
     case_id_var <- sym(case_id(eventlog()))
@@ -129,7 +137,7 @@ processFlowTab <- function(input, output, session, eventlog){
     req(input$mapType)
     req(input$sizeAttribute)
     req(input$colorAttribute)
-    req(input$timelineMode)
+    req(input$animationMode)
     
     # Filter base eventlog
     plotdata <- eventlog() %>% 
@@ -145,6 +153,13 @@ processFlowTab <- function(input, output, session, eventlog){
     # Set map type
     if(input$mapType == "durations"){
       map_type <- performance(units = "days")
+    }
+    
+    # Set animation mode (relative vs absolute time)
+    if(input$animationMode == "relative time"){
+      mode <- "relative"
+    } else {
+      mode <- "absolute" 
     }
     
     # Set size mapping
@@ -192,7 +207,7 @@ processFlowTab <- function(input, output, session, eventlog){
     # Animated process map 
     animate_process(eventlog = plotdata, 
                     processmap = processmapR::process_map(plotdata, width = 600, height = 600, render = FALSE, type = map_type),
-                    mode = input$timelineMode,
+                    mode = mode,
                     legend = legend_type,
                     mapping = token_aes(color = color_mapping, size = size_mapping),
                     token_callback_select = token_select_decoration(stroke = "red"))
