@@ -36,7 +36,7 @@ processFlowTabUI <- function(id){
                solidHeader = TRUE,
                width = 12,
                closable = FALSE,
-               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 700) %>% 
+               shinycssloaders::withSpinner(processanimaterOutput(ns("process"), height = 500) %>% 
                                               shinyhelper::helper(type = "inline", title = "Process flow", content = process_flow_diagram_help_text, size = 'l'))
            ),
            box(title = "Selected case",
@@ -115,8 +115,6 @@ processFlowTab <- function(input, output, session, eventlog){
     req(input$process_tokens)
     req(length(input$process_tokens) >= 1)
     
-    
-    
     # Filter on selected case_id, drop .order column
     case_id_var <- sym(case_id(eventlog()))
     timestamp_var <- sym(timestamp(eventlog()))
@@ -125,7 +123,7 @@ processFlowTab <- function(input, output, session, eventlog){
       as.data.frame() %>% 
       select(-all_of(c(".order"))) %>% 
       arrange(!!timestamp_var)
-  })
+  }, options = list(searching = FALSE, paging = FALSE))
   
   
   # Animated process flow diagram

@@ -17,13 +17,14 @@ javascript_head <- tags$head(tags$script('
         var window_height = $(window).height();
         var header_height = $(".main-header").height();
 
-        var boxHeight = window_height - header_height - 100;
-
-        $("#process_box").height(boxHeight);
-        $("#process_flow-process").height(boxHeight - 30);
+        var boxHeightGeneral = window_height - header_height - 100;
+        var boxHeightProcessFlow = boxHeightGeneral - 50;
         
-        $("#timeline_box").height(boxHeight);
-        $("#events_timeline-plotlydottedchart").height(boxHeight - 30);
+        $("#process_box").height(boxHeightProcessFlow);
+        $("#process_flow-process").height(boxHeightProcessFlow - 30);
+        
+        $("#timeline_box").height(boxHeightGeneral);
+        $("#events_timeline-plotlydottedchart").height(boxHeightGeneral - 30);
       };
 
       // Set input$box_height when the connection is established
