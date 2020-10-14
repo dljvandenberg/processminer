@@ -16,6 +16,13 @@ library(plotly)
 ##################################
 eventlogSummaryTabUI <- function(id){
   ns <- NS(id)
+  
+  # Helper texts
+  summary_stats_help_text <- "
+  <p>We use the following definitions:
+  <li>A <b>case</b> has a unique case id that can be tracked over time. Generally, multiple events are logged under a single case id.</li>
+  <li>An <b>event</b> occurs at a given timestamp.</li>
+  <li>An <b>activity</b> is the type of event. It can (but doesn't need to) have a start and end time).</li></p>"
 
   body_summary_statistics <- fluidRow(
     
@@ -41,7 +48,8 @@ eventlogSummaryTabUI <- function(id){
         status = "primary",
         solidHeader = TRUE,
         width = 6,
-        shinycssloaders::withSpinner(tableOutput(ns("stats_table")))
+        shinycssloaders::withSpinner(tableOutput(ns("stats_table"))) %>% 
+          shinyhelper::helper(type = "inline", title = "Summary statistics", content = summary_stats_help_text, size = 'l')
     )
   )
   
@@ -55,7 +63,6 @@ eventlogSummaryTabUI <- function(id){
 ######################################
 eventlogSummaryTab <- function(input, output, session, eventlog, default_color = "skyblue2"){
   ns <- session$ns
-  
   
   output$stats_cases <- plotly::renderPlotly({
     
