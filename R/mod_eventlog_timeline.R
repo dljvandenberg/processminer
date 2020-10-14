@@ -49,5 +49,5 @@ eventsTimelineTab <- function(input, output, session, eventlog){
   })
   
   # Show events_timeline tab in menu
-  menuItem(text = "Events Timeline", tabName = "events_timeline", icon = icon("clock"))
+  menuItem(text = "Events timeline", tabName = "events_timeline", icon = icon("clock"))
 }
