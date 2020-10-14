@@ -16,6 +16,13 @@ library(plotly)
 #################################
 eventsTimelineTabUI <- function(id){
   ns <- NS(id)
+  
+  # Helper texts
+  timeline_view_help_text <- "
+  <p>The <b>timeline view</b> shows all events over time (x-axis), for each case (y-axis). Each dot represents an <b>event</b>.</p>
+  <p>The events of a single <b>case</b> are shown horizontally next to each other.</p>
+  <p>The color of each dot corresponds to the <b>type of activity</b> (see legend).</p>
+  <p>You can select an area of the diagram by dragging the mouse.</p>"
 
   # Events Timeline body contents
   body_events_timeline <- fluidRow(
@@ -24,7 +31,8 @@ eventsTimelineTabUI <- function(id){
         status = "primary",
         solidHeader = TRUE,
         width = 12,
-        shinycssloaders::withSpinner(plotlyOutput(ns("plotlydottedchart"), height = 700))
+        shinycssloaders::withSpinner(plotlyOutput(ns("plotlydottedchart"), height = 700) %>% 
+                                       shinyhelper::helper(type = "inline", title = "Timeline view", content = timeline_view_help_text, size = 'l'))
     ),
   )
   
