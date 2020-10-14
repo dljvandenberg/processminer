@@ -49,6 +49,23 @@ add_time_since_case_start <- function(eventlog, units = "days") {
 loadEventLogTabUI <- function(id, type = 'data_upload'){
   ns <- NS(id)
   
+  # Helper texts
+  example_dataset_help_text <- "
+  <p>Please <b>select an example eventlog</b> from the list.</p>
+  <p>Once the data is loaded multiple analysis views will show up in the menu on the left.</p>
+  <p>Alternatively, choose the <b>Data upload</b> menu option to upload and analyse your own eventlog.</p>"
+  
+  upload_eventlog_help_text <- "
+    <p>When uploading your own dataset, provide aclean Excel file with <b>all data in a tabular format on the first tab</b>. Make sure the first line contains the column names. </p>
+    <p>Note that eventlog data should contain at least the <b>following three columns</b> (names are allowed to be different):
+      <li>Case identifier</li>
+      <li>Date/time</li>
+      <li>Activity</li></p>
+    <p>Right after the data upload you will be asked which column in the data corresponds to each of these.</p>
+    <p>That's it! Once the data is loaded multiple analysis views will show up in the menu on the left.</p>"
+  
+  
+  
   # Show different contents based on type ('data_upload' or 'example_dataset')
   if(type == 'data_upload') {
     
@@ -59,7 +76,8 @@ loadEventLogTabUI <- function(id, type = 'data_upload'){
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  fileInput(inputId = ns("eventlogFile"), label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx"))
+                  fileInput(inputId = ns("eventlogFile"), label = "Upload eventlog (.xls, .xlsx)", accept = c(".xls", ".xlsx")) %>% 
+                    shinyhelper::helper(type = "inline", title = "Upload eventlog", content = upload_eventlog_help_text, size = 'l')
               ),
               uiOutput(outputId = ns("data_sample_box")),
               uiOutput(outputId = ns("variable_selection_box"))
@@ -75,7 +93,8 @@ loadEventLogTabUI <- function(id, type = 'data_upload'){
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  uiOutput(ns("example_dataset_selector"))
+                  uiOutput(ns("example_dataset_selector")) %>% 
+                    shinyhelper::helper(type = "inline", title = "Example dataset", content = example_dataset_help_text, size = 'l')
               )
             )
     )
@@ -193,7 +212,7 @@ loadEventLogTab <- function(input, output, session, myreactivevalues, type = 'da
       ) %>% 
       # Add time_since_start column to eventlog
       add_time_since_case_start()
-
+    
     print(paste0("INFO: eventlog generated from data upload (containing ", nrow(myreactivevalues$eventlog), " lines)"))
     
   })

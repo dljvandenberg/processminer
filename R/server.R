@@ -28,6 +28,14 @@ server <- function(session, input, output) {
     reactivevalues <- reactiveValues(eventlog = NULL)
 
     
+    ##################
+    ## Helper texts ##
+    ##################
+    
+    # Needed for help button text responsiveness
+    shinyhelper::observe_helpers()
+    
+    
     ########################
     ## Render UI contents ##
     ########################
